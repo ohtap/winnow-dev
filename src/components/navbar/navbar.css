@@ -1,0 +1,37 @@
+a {
+    color: #58585B;
+}
+
+a:hover {
+    color: black;
+}
+
+.navBarImg {
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+}
+
+.toggle-button {
+    background-color: transparent;
+    border-radius: 50px;
+}
+
+.dropdown-toggle:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.dropdown-toggle::after {
+    content: none;
+}
+
+.navBarImg {
+    width: 48px;
+    height: 48px;
+    border-radius: 48px;
+}
+
+ul {
+    list-style-type: none;
+  }

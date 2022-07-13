@@ -1,0 +1,64 @@
+/* File: auth.css
+ * Author(s): Ben Ruland, Carlo Dino
+ *
+ * This file contains the styling classes for the authentication-related pages,
+ * Login and Register. 
+ */
+
+ h1.login-text {
+    color: #8C1515;
+    font-size: 9vh;
+    padding-top: 7vh;
+    padding-bottom: 4vh;
+}
+
+p.login-text {
+    color: #8C1515;
+    padding-bottom: 2vh;
+}
+
+.form-div {
+    width: 40%;
+}
+
+.form-input {
+    background-color: #8C1515;
+    color:white;
+    border-radius: 10px;
+    border: none;
+    width: 100%;
+    display: inline-block;
+
+    
+    height: 60px;
+    margin-bottom: 3vh;
+}
+
+.form-input::placeholder {
+    color: white;
+}
+
+.form-input:focus {
+    background-color: #8C1515;
+    color:white;
+}
+
+#submit-btn {
+    width: 100%;
+    height: 55px;
+    border-radius: 10px;
+}
+
+.submitButton {
+    width: 75%;
+    height: 17%;
+}
+
+.inputArea {
+    width: 75%;
+    height: 20%;
+}
+
+.formContainer {
+    display: block;
+}
