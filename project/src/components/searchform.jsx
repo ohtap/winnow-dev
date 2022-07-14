@@ -12,13 +12,13 @@ import { Link } from "react-router-dom";
 // import styles from main page, and auth.css
 import "./searchform.css";
 import { promises, useContext, useRef, useState } from "react";
-import searchFiles from "./searchFunc";
+import SearchFiles from "./searchFunc";
 
 export default function SearchForm() {
 
     // store selected directories to be passed on
     const [corpus, corpusUpdate]= useState();
-
+    const [flag, setFlag] = useState(false);
     // store 
     const to_include = useRef();
     const to_exclude = useRef();
@@ -31,12 +31,17 @@ export default function SearchForm() {
 
 
         //snags inputs
+        
+       setFlag(true);
+    };
+
+    const runSearch = () => {
         const includeTokens = keywordParse(to_include.current.value);
         const excludeTokens = keywordParse(to_exclude.current.value);
 
-        searchFiles(corpus,includeTokens,excludeTokens);
-
-    };
+        return SearchFiles(corpus,includeTokens,excludeTokens);
+        
+    }
 
     // parses comma seperated keywords into an array and trims whitespaces
 
@@ -77,6 +82,9 @@ export default function SearchForm() {
 
 
     return (
+        <div>
+            {flag ? runSearch()  :
+
         <div className="w-100 vh-100 align-items-center source-sans border main" >
             {/* text div, stores "Sign in" etc text from top of the page */}
             <div className="w-auto">
@@ -111,6 +119,7 @@ export default function SearchForm() {
                     <Link to="/register" className="btn btn-success text-decoration-none">Create an Account</Link>
                 </div>
             </div>
+        </div>}
         </div>
     );
 }
