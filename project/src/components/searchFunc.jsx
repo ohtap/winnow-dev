@@ -1,4 +1,4 @@
-import {useRef} from "react";
+import {useRef, useState} from "react";
 /*
 Notes to self: 
     Can access a file by name within a dir by using the dirHandle.getFileHandle(fileName); 
@@ -10,13 +10,18 @@ Notes to self:
 // just creating a transform to take the stream and save it into the 
 
 
-export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens){
+export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens,dest_name,progress, setProgress){
     // here we can do a bunch of data work on whatever was passed in
     
+    
+    
+    
+
     console.log(corpus_dir.name)
     console.log(includeTokens);
-    var map = {};
 
+    // the example code shown on mdn web_docs, verifies read/write usage
+    
 
     
     const buildRef = async() => {
@@ -45,8 +50,15 @@ export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens){
                         word = word.replace(/[,."!?@#$%&*]+/g, " ").trim();
 
                         // if map hasnt been initialized it initializes it to an array before pushing.
-                        refMap[word] = refMap[word] || [];
-                        refMap[word].push(fileHandle.name);
+                    
+                        if (word && word != "constructor"){
+                        try {refMap[word] = refMap[word] || [];
+                        refMap[word].push(fileHandle.name)} catch(err){
+                            console.log(typeof word);
+                            console.log(word);
+                            console.log(err);
+                        }
+                        } 
 
                     }
                 }
@@ -54,15 +66,15 @@ export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens){
             }else {
                 console.log("not a file");
             }
-        
-         
+        console.log("n");
+         setProgress(progress += 1);
         }
         return refMap;
     }
 
     // TODO: comment, and needs to return a falsy if no matching files. 
     const findFiles = async(ref) => {
-        console.log(ref);
+        //console.log(ref)
        const files = new Set();
        //console.log(Object.keys(ref));
         for (const word of includeTokens){
@@ -88,36 +100,38 @@ export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens){
        //TODO: turn this into checks for finding the correct directory, creating the correct subdir and so on, currently it is hardcoded for testing
         // guard against falsy find files values. 
     const saveFiles = async(subCorpus) => {
+            console.log("now saving files"); 
         // creating the folder to store the files in
-        const subCorpus_dir = await corpus_dir.getDirectoryHandle("run1", {create: true});
-            console.log("arrived in saveFiles");
-            console.log(subCorpus);
+
         for (const file of subCorpus) {
             // grab file from corpus dir
             const fileHandle = await corpus_dir.getFileHandle(file);
             // turn that file into a string to write with
+
             const toWrite = await fileHandle.getFile().then( file => file.text());
             // create new file of same filename in this dir
-            var destFileHandle = await subCorpus_dir.getFileHandle(file, {create: true});
+
+
+           try { 
+            const destCorpus = await corpus_dir.getDirectoryHandle(dest_name, {create:true});
+            var destFileHandle = await destCorpus.getFileHandle(file, {create: true})
+                }catch(err){console.log(err)}
 
             // create a writeable object pass the read of the file into this to perform a copy
+            if(destFileHandle){
             const destWriter = await destFileHandle.createWritable();
 
-            destWriter.write(toWrite).then(() => destWriter.close());
-            // console.log(destFileHandle);
+            destWriter.write(toWrite).then(() => destWriter.close());}
         }
-
+       
    }
 
+   
+
    const subCorp=  buildRef().then(refMap => findFiles(refMap)).then( subCorp => saveFiles(subCorp));
-   //findFiles();
 
 
 
-    //findFiles(myMap);
-    return (
-        <div>
-            <p>CARLO BRO</p>
-        </div>
-    )
+
+    return ;
 }
