@@ -65,7 +65,7 @@ export default function SearchForm() {
         await verifyPermission(corpus,true);
 
         //snags inputs
-        runSearch();
+        runSearch().then(() => setFlag(true));
     };
 
     const runSearch = async() => {
@@ -75,9 +75,9 @@ export default function SearchForm() {
         //TODO sets running flag to true. 
         setLoading(true);
 
-        const data = SearchFiles(corpus,includeTokens,excludeTokens,dest_name.current.value, progress, setProgress,setFlag);
+        return await SearchFiles(corpus,includeTokens,excludeTokens,dest_name.current.value, progress, setProgress,setFlag);
         // takes the place of redirecting to a new page at the moment
-
+        
         // TODO sends the search results (probably a file handle and status of search) to a new page. 
         
     }
@@ -138,8 +138,12 @@ export default function SearchForm() {
         <div>
             {loading 
                 ? <div>
-                    <div className="loader"></div>
-                    {!flag && <p>Compiling files, {progress} files read</p>}
+                    
+                    {!flag &&
+                     <div>
+                        <div className="loader"></div>
+                         <p>Compiling files, {progress} files read</p>
+                     </div>}
                     { flag && <p>Success proccessed and searched {progress} files </p>}
                     </div>
                 :<div className="w-100 vh-100 align-items-center source-sans border main" >

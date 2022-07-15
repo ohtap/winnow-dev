@@ -10,7 +10,7 @@ Notes to self:
 // just creating a transform to take the stream and save it into the 
 
 
-export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens,dest_name,progress, setProgress, setFlag){
+export default async function SearchFiles (corpus_dir, includeTokens, excludeTokens,dest_name,progress, setProgress, setFlag){
     // here we can do a bunch of data work on whatever was passed in
     
     
@@ -127,10 +127,10 @@ export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens,d
 
    
 
-   const subCorp=  buildRef().then(refMap => findFiles(refMap)).then( subCorp => saveFiles(subCorp));
+   
 
 
 
 
-    return ;
+    return  buildRef().then(refMap => findFiles(refMap)).then( subCorp => saveFiles(subCorp));
 }
