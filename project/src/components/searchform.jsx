@@ -75,9 +75,8 @@ export default function SearchForm() {
         //TODO sets running flag to true. 
         setLoading(true);
 
-        const data = SearchFiles(corpus,includeTokens,excludeTokens,dest_name.current.value, progress, setProgress).then(() => {setFlag(true)});
+        const data = SearchFiles(corpus,includeTokens,excludeTokens,dest_name.current.value, progress, setProgress,setFlag);
         // takes the place of redirecting to a new page at the moment
-
 
         // TODO sends the search results (probably a file handle and status of search) to a new page. 
         

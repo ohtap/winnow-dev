@@ -10,7 +10,7 @@ Notes to self:
 // just creating a transform to take the stream and save it into the 
 
 
-export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens,dest_name,progress, setProgress){
+export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens,dest_name,progress, setProgress, setFlag){
     // here we can do a bunch of data work on whatever was passed in
     
     
@@ -123,7 +123,6 @@ export default function  SearchFiles (corpus_dir, includeTokens, excludeTokens,d
 
             destWriter.write(toWrite).then(() => destWriter.close());}
         }
-       
    }
 
    
