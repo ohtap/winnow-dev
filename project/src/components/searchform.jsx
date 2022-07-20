@@ -1,81 +1,74 @@
-/* File: Login.jsx
- * Author: Ben Ruland, Carlo Dino
- *
- * This file contains the React code for the Login page component of the
- * EpicConnect website. The page creates a form entry with two input
- * elements to collect the {username} and {password} fields from the user,
- * before connecting to the server to authenticate login credentials.
+/* 
+ * Queries user to search their selected corpus, Sends user entered information to the SearchFunc component to run the actual search
+ * 
+ * -Ben Ruland
  */
 
 
-import { Link } from "react-router-dom";
+// TODO :  ADD READING, SAVING FILES, flags and functionality. 
+
 // import styles from main page, and auth.css
 import "./searchform.css";
-import { promises, useContext, useRef, useState } from "react";
+import { useContext, useRef, useState} from "react";
 import SearchFiles from "./searchFunc";
+import { useNavigate } from "react-router";
+
+import { AuthContext } from "../context/AuthContext";
+import { useEffect } from "react";
 
 export default function SearchForm() {
 
-    // store selected directories to be passed on
+    
+    // stores the selected directories to be passed on
     const [corpus, corpusUpdate]= useState();
-    const [destCorpus, destUpdate]= useState();
+    // finished searching flag, will use later to redirect to results page
     const [flag, setFlag] = useState(false);
+    // loading flag, used to conditionally render a loading screen while searching
     const [loading, setLoading] = useState(false);
+    // used to render how many files have been searched
     const [progress, setProgress] = useState(0);
-    // store 
 
-    const to_include = useRef();
-    const to_exclude = useRef();
-    const dest_name = useRef();
+    // used to navigate to a new page
+    const navigate = useNavigate();
 
+    // saving state variables
+    const raw_include = useRef();
+    const raw_exclude = useRef();
+    const subCorp_name = useRef();
 
-    // taken from the API, checks for permissions and if not found requests them
-    // must be called on a user action (i.e button press)
-    async function verifyPermission(fileHandle,withWrite) {
-        console.log("inside verify permission");
-        const opts = {};
-        if (withWrite) {
-          opts.mode = 'readwrite';
+    // grabing the working dir
+    const {winnowDir} = useContext(AuthContext);
+
+    // controls navigating to the results page when done searching
+    // using a useEffect to keep everything rendering in the same order for react. 
+    useEffect(() => {
+        if(winnowDir && flag) {
+        // TODO update state for the most recent processed file 
+        // then navigate to results page. 
+        navigate("/results");
         }
-        console.log("checking if we have permission");
-        // Check if we already have permission, if so, return true.
-        if (await fileHandle.queryPermission(opts) === 'granted') {
-            console.log("permission = true");
-          return true;
-        }
-      console.log("req permission");
-        // Request permission to the file, if the user grants permission, return true.
-        if (await fileHandle.requestPermission(opts) === 'granted') {
-          return true;
-        }
-        console.log("could not obtain permission");
-        // The user did not grant permission, return false.
-        return false;
-      }
-
+    },[flag])
 
     // Runs the form submission
     const handleSubmit = async (event) => {
+        // prevents page refresh
         event.preventDefault();
-
-        // TODO check if corpus hasn been selected
-
-        // grabs user verification for write privledges 
-       // await verifyPermission(destCorpus,true);
-        await verifyPermission(corpus,true);
-
-        //snags inputs
+        // checks if corpus has been selected then runs search
+        if (corpus){
         runSearch().then(() => setFlag(true));
+        } else {
+            alert("please select a corpus");
+        }
     };
 
+    // parses keywords, sets loading flag, then runs the actual search and save process
     const runSearch = async() => {
-        const includeTokens = keywordParse(to_include.current.value);
-        const excludeTokens = keywordParse(to_exclude.current.value);
+        const includeTokens = keywordParse(raw_include.current.value);
+        const excludeTokens = keywordParse(raw_exclude.current.value);
 
-        //TODO sets running flag to true. 
         setLoading(true);
 
-        return await SearchFiles(corpus,includeTokens,excludeTokens,dest_name.current.value, progress, setProgress,setFlag);
+        return await SearchFiles(corpus,includeTokens,excludeTokens,subCorp_name.current.value, progress, setProgress,winnowDir);
         // takes the place of redirecting to a new page at the moment
         
         // TODO sends the search results (probably a file handle and status of search) to a new page. 
@@ -99,10 +92,7 @@ export default function SearchForm() {
         return cleantokens;
     }
 
-
-
-
-    // picks a directory then prints all the files of the directory
+    // picks a directory to use 
     const filePicker = async(event) => {
         event.preventDefault();
         console.log(  "This is our file:");
@@ -119,23 +109,10 @@ export default function SearchForm() {
         
     };
 
-    const destPicker = async(event) => {
-        event.preventDefault();
-        // grabs a directory
-        const fileHandle = await showDirectoryPicker({mode: "readwrite"})
-
-        // updates the global state to pass this handle around
-        destUpdate(fileHandle);
-
-        // Changes button text to represent the user selection
-        // TODO check if there is a 'react' way of doing this. 
-        document.getElementById("destCorpus").innerHTML = fileHandle.name;
-
-        
-    };
 
     return (
         <div>
+            {/* Conditionally rendering a loading screen or the search form*/}
             {loading 
                 ? <div>
                     
@@ -144,7 +121,7 @@ export default function SearchForm() {
                         <div className="loader"></div>
                          <p>Compiling files, {progress} files read</p>
                      </div>}
-                    { flag && <p>Success proccessed and searched {progress} files </p>}
+                    
                     </div>
                 :<div className="w-100 vh-100 align-items-center source-sans border main" >
                     {/* text div, stores "Sign in" etc text from top of the page */}
@@ -160,32 +137,25 @@ export default function SearchForm() {
                             </button>*/}
                             <input 
                                  className="form-input"
-                                 ref={dest_name}
+                                 ref={subCorp_name}
                                  placeholder="Subcorpi Name"> 
                              </input>
                             <input
                                 className="form-input"
-                                ref={to_include}
+                                ref={raw_include}
                                 placeholder="Search Terms">
                             </input>
                             
                             <input
                                 className="form-input"
-                                ref={to_exclude}
-                                placeholder="Disclude Terms">
+                                ref={raw_exclude}
+                                placeholder="Exclude Terms">
                             </input>
                             {/* submission button, uses onClick event to upload to server */}
                             <button type="submit" id="submit-btn" className="btn btn-success">
                                 submit
                             </button>
                         </form>
-                        <div className="w-auto pt-5">
-                            <p className="text-center login-text fs-5 m-0">New to EpicConnect?</p>
-                        </div>
-                            {/* create account redirect */}
-                        <div className="w-100 d-flex justify-content-center">
-                            <Link to="/register" className="btn btn-success text-decoration-none">Create an Account</Link>
-                        </div>
                     </div>
                 </div>}
         </div>
