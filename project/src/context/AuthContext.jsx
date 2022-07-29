@@ -6,8 +6,10 @@
 import { createContext, useReducer } from "react";
 import AuthReducer from "./AuthReducer";
 
+// TODO: make use of the error field by writing error dispatches and logging them along with recovery logic if the error state is true.
 const INITIAL_STATE = {
     winnowDir: null,
+    recentRunDir: null,
     error: false
 };
 
@@ -20,6 +22,7 @@ export const AuthContextProvider = ({ children }) => {
         <AuthContext.Provider
             value={{
                 winnowDir: state.winnowDir,
+                recentRunDir: state.recentRunDir,
                 error: state.error,
                 dispatch
             }}>

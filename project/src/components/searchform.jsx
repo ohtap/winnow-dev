@@ -37,17 +37,40 @@ export default function SearchForm() {
     const subCorp_name = useRef();
 
     // grabing the working dir
-    const {winnowDir} = useContext(AuthContext);
+    const {winnowDir, dispatch} = useContext(AuthContext);
 
-    // controls navigating to the results page when done searching
-    // using a useEffect to keep everything rendering in the same order for react. 
-    useEffect(() => {
-        if(winnowDir && flag) {
-        // TODO update state for the most recent processed file 
-        // then navigate to results page. 
-        navigate("/results");
+
+    /* IMPLEMENTATION THOUGHTS:
+        Metadata
+
+        add an optional metadata field to the form (ideal if we use some different form colors), make sure it only takes the proper file format
+
+        pass all of this to a seperate metadata function. 
+        // How does one even process an excel sheet? 
+            some info on that, can use others libraries
+            could also try and read it in myself? .. any way to do it in a general fashion? 
+               well collecting could be possible but the treatment for each column is totally different dependent on the col data. 
+                will get all the data into a 2d array 
+*/
+
+    async function verifyPermission(fileHandle,withWrite) {
+        const opts = {};
+        if (withWrite) {
+          opts.mode = 'readwrite';
         }
-    },[flag])
+        // Check if we already have permission, if so, return true.
+        if (await fileHandle.queryPermission(opts) === 'granted') {
+            console.log("permission = true");
+          return true;
+        }
+        // Request permission to the file, if the user grants permission, return true.
+        if (await fileHandle.requestPermission(opts) === 'granted') {
+          return true;
+        }
+        console.log("could not obtain permission");
+        // The user did not grant permission, return false.
+        return false;
+      }
 
     // Runs the form submission
     const handleSubmit = async (event) => {
@@ -55,7 +78,7 @@ export default function SearchForm() {
         event.preventDefault();
         // checks if corpus has been selected then runs search
         if (corpus){
-        runSearch().then(() => setFlag(true));
+         runSearch().then(() => navigate("/results"));
         } else {
             alert("please select a corpus");
         }
@@ -67,11 +90,17 @@ export default function SearchForm() {
         const excludeTokens = keywordParse(raw_exclude.current.value);
 
         setLoading(true);
-
-        return await SearchFiles(corpus,includeTokens,excludeTokens,subCorp_name.current.value, progress, setProgress,winnowDir);
-        // takes the place of redirecting to a new page at the moment
         
-        // TODO sends the search results (probably a file handle and status of search) to a new page. 
+        const recentRunDir = await SearchFiles(corpus,includeTokens,excludeTokens,subCorp_name.current.value, progress, setProgress,winnowDir);
+        
+        // if succesful we add the most recent corpus directory handle into the state to be used in the results page.
+        if (recentRunDir){
+            dispatch({ type: "RECENT RUN CHANGE", payload: recentRunDir});
+
+        }else {
+            alert("Something went wrong and we have not dispatched");
+            // TODO Dispatch an error here, or some other form of error handling that keeps this from going to results page in the handle Submit.
+        }
         
     }
 
@@ -97,11 +126,11 @@ export default function SearchForm() {
         event.preventDefault();
         console.log(  "This is our file:");
         // grabs a directory
-        const fileHandle = await showDirectoryPicker({mode: "readwrite"})
-
+        const fileHandle = await showDirectoryPicker()
+        
         // updates the global state to pass this handle around
         corpusUpdate(fileHandle);
-
+        verifyPermission(fileHandle, true);
         // Changes button text to represent the user selection
         // TODO check if there is a 'react' way of doing this. 
         document.getElementById("corpus").innerHTML = fileHandle.name;

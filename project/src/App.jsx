@@ -6,7 +6,6 @@ import './App.css';
 
 // import components
 import NavBar from "./components/navbar/navbar";
-import SearchFiles from './components/searchFunc';
 import Search from './pages/search'
 import Home from "./pages/home.jsx";
 import Result from "./pages/result";

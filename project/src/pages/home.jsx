@@ -1,5 +1,4 @@
 import "./home.css";
-import SearchForm from "../components/searchform"
 import Landing from "../components/landing"
 
 export default function Home() {

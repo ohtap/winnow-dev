@@ -1,3 +1,9 @@
+/*
+    The purpose of this page is to obtain the users permissions for the entire winnow directory so we do not need to ask again for any file manipulation and creation
+    within the diredtory. 
+*/
+
+
 import { useNavigate, useLocation} from "react-router-dom";
 // import styles from main page, and auth.css
 import "./searchform.css";
@@ -5,12 +11,10 @@ import { promises, useContext, useRef, useState,} from "react";
 import SearchFiles from "./searchFunc";
 
 import { AuthContext } from "../context/AuthContext";
-
+import { changeWDirectory } from "../context/AuthActions";
 export default function Landing() {
 
     const [directory,setDirectory] = useState();
-    const workingFolder = useRef();
-    const [redirect, setRedirect] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -19,18 +23,15 @@ export default function Landing() {
     // taken from file system access API, checks for permissions and if not found requests them
     // must be called on a user action (i.e button press)
     async function verifyPermission(fileHandle,withWrite) {
-        console.log("inside verify permission");
         const opts = {};
         if (withWrite) {
           opts.mode = 'readwrite';
         }
-        console.log("checking if we have permission");
         // Check if we already have permission, if so, return true.
         if (await fileHandle.queryPermission(opts) === 'granted') {
             console.log("permission = true");
           return true;
         }
-      console.log("req permission");
         // Request permission to the file, if the user grants permission, return true.
         if (await fileHandle.requestPermission(opts) === 'granted') {
           return true;
@@ -59,6 +60,11 @@ export default function Landing() {
             dispatch({ type: "DIRECTORY CHANGE", payload: directory });
             navigate("/search");
         }  
+
+        /*if (permission) {
+            changeWDirectory(directory);
+            navigate("/search");
+        }*/
         else {
             alert("Please allow access to Winnow files to be able to continue");
         }
@@ -72,7 +78,6 @@ export default function Landing() {
     // picks a directory to use 
     const filePicker = async(event) => {
         event.preventDefault();
-        console.log(  "This is our file:");
         // grabs a directory
         const fileHandle = await showDirectoryPicker({mode: "readwrite"})
 
@@ -86,10 +91,6 @@ export default function Landing() {
         
     };
 
-    /*if (redirect){
-        return <Navigate to={{ pathname: '/search', state: { directory } }} />
-    }*/
-    console.log(location);
 return (
 <div className="w-100 vh-100 align-items-center source-sans border main" >
 {/* text div, stores "Sign in" etc text from top of the page */}
