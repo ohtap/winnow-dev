@@ -45,9 +45,6 @@ export default async function SearchFiles (corpus_dir, includeTokens, excludeTok
             contents = await JSON.parse(mapFile);
         }
         // same for word counter
-        
-           
-         
         return contents;
     }
 
@@ -65,9 +62,7 @@ export default async function SearchFiles (corpus_dir, includeTokens, excludeTok
             wordCounter = await wordCounter.getFile();
             wordCounter = await wordCounter.text();
             count = await JSON.parse(wordCounter);
-            return count;
         }
-        alert("error reading word counter");
         return count;
     }
     // Builds and then saves the search dictionary
@@ -75,7 +70,6 @@ export default async function SearchFiles (corpus_dir, includeTokens, excludeTok
     const buildMap = async(wordCounter) => {
         console.log("building ref");
         const refMap = {};
-        var rapeCount = 0;
         for await(const entry of corpus_dir.values()){
             // ignores folders and any ds store files
             if (entry.kind === 'file' && entry.name !== ".DS_Store"){
@@ -134,10 +128,9 @@ export default async function SearchFiles (corpus_dir, includeTokens, excludeTok
          setProgress(progress += 1);
         }
 
-        console.log("rapecount is ");
-        console.log(rapeCount);
         // saves the map before returning it. 
-        saveMap(refMap);
+        await saveWordCount(wordCounter)
+        await saveMap(refMap);
         return refMap;
     }
 
@@ -160,6 +153,14 @@ export default async function SearchFiles (corpus_dir, includeTokens, excludeTok
         // TODO: return some sort of success metric
     }
 
+    const saveWordCount = async(wordCounter) => {
+        const dirHandle = await corpus_dir.getDirectoryHandle("Winnow_data", {create:true});
+        const wordCountHandle = await dirHandle.getFileHandle("wordCounts.txt", {create:true});
+
+        const wordCountWriter = await wordCountHandle.createWritable();
+        console.log(wordCounter);
+        await wordCountWriter.write(JSON.stringify(wordCounter)).then(() => wordCountWriter.close());
+    }
    
     
     // TODO: comment, and needs to return a falsy if no matching files. 
