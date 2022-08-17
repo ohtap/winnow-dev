@@ -97,12 +97,14 @@ export default function SearchForm() {
         
         // send off to do the search, then set the created results directory in the global state
         await search(corpus,includeTokens,subCorp_name.current.value,winnowDir, updateProgCount).then((recentRunDir) => {
+            if (!recentRunDir){
+                alert("There was an error in searching, please try again or contact a developer");
+            }
+            
             dispatch({ type: "RECENT RUN CHANGE", payload: recentRunDir});
         });
         
-        if (!recentRunDir){
-            alert("There was an error in searching, please try again or contact a developer");
-        }
+       
       
     }
 

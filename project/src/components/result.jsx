@@ -2,6 +2,7 @@
 import { AuthContext } from "../context/AuthContext";
 import { useContext } from "react";
 
+import "./result.css";
 export default function DisplayResult() {
   const {winnowDir, dispatch,recentRunDir} = useContext(AuthContext);
 
@@ -24,7 +25,9 @@ export default function DisplayResult() {
   
   return (
     <div>
-      <p> Results: {recentRunDir.name}</p>
+      <div className="aboutSearch">
+         <p> Results: {recentRunDir.name}</p>
+      </div>
       <pre id = "result"> Loading File</pre>
     </div>
   );

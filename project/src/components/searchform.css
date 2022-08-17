@@ -1,8 +1,6 @@
 /* File: auth.css
- * Author(s): Ben Ruland, Carlo Dino
+ * Author(s): Ben Ruland
  *
- * This file contains the styling classes for the authentication-related pages,
- * Login and Register. 
  */
  input:focus::placeholder {
     color: transparent;
