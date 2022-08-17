@@ -4,6 +4,9 @@
  * This file contains the styling classes for the authentication-related pages,
  * Login and Register. 
  */
+ input:focus::placeholder {
+    color: transparent;
+  }
 
  h1.login-text {
     color: #8C1515;
@@ -63,13 +66,23 @@ p.login-text {
     display: block;
 }
 
+.loaderContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    font-size: 3vh;
+}
+
 .loader {
     border: 16px solid #f3f3f3; /* Light grey */
     border-top: 16px solid #3498db; /* Blue */
     border-radius: 50%;
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
     animation: spin 2s linear infinite;
+ 
   }
   
   @keyframes spin {

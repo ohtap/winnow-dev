@@ -6,10 +6,9 @@ import './App.css';
 
 // import components
 import NavBar from "./components/navbar/navbar";
-import Search from './pages/search'
-import Home from "./pages/home.jsx";
-import Result from "./pages/result";
-
+import Landing from './components/landing';
+import DisplayResult from './components/result';
+import SearchForm from './components/searchform';
 
 
 function App() {
@@ -22,9 +21,9 @@ function App() {
       <NavBar />
       <div className="h-75">
         <Routes>
-          <Route exact path="/" element = {Home()}/>
-          <Route path = "/search" element = {Search()}/>
-          <Route path = "/results" element = {Result()}/>
+          <Route exact path="/" element = {<Landing/>}/>
+          <Route path = "/search" element = {<SearchForm/>}/>
+          <Route path = "/results" element = {<DisplayResult/>}/>
           {/* add error component here */}
         </Routes>
         
@@ -33,4 +32,5 @@ function App() {
   </Router>
     
   )};
+
 export default App

@@ -8,13 +8,12 @@
 // TODO :  ADD READING, SAVING FILES, flags and functionality. 
 
 // import styles from main page, and auth.css
+import search from "./search.jsx";
 import "./searchform.css";
 import { useContext, useRef, useState} from "react";
-import SearchFiles from "./searchFunc";
 import { useNavigate } from "react-router";
 
 import { AuthContext } from "../context/AuthContext";
-import { useEffect } from "react";
 
 export default function SearchForm() {
 
@@ -26,7 +25,8 @@ export default function SearchForm() {
     // loading flag, used to conditionally render a loading screen while searching
     const [loading, setLoading] = useState(false);
     // used to render how many files have been searched
-    const [progress, setProgress] = useState(0);
+    var [progress, setProgress] = useState(0);
+    const [metaFile, setMetaFile] = useState();
 
     // used to navigate to a new page
     const navigate = useNavigate();
@@ -52,7 +52,9 @@ export default function SearchForm() {
                well collecting could be possible but the treatment for each column is totally different dependent on the col data. 
                 will get all the data into a 2d array 
 */
-
+    const updateProgCount = ()=>{
+        setProgress(progress+= 1);
+    }
     async function verifyPermission(fileHandle,withWrite) {
         const opts = {};
         if (withWrite) {
@@ -76,8 +78,9 @@ export default function SearchForm() {
     const handleSubmit = async (event) => {
         // prevents page refresh
         event.preventDefault();
-        // checks if corpus has been selected then runs search
-        if (corpus){
+        
+        // checks if corpus has been selected then runs search then navigates to the results pag
+         if (corpus){
          runSearch().then(() => navigate("/results"));
         } else {
             alert("please select a corpus");
@@ -89,19 +92,18 @@ export default function SearchForm() {
         const includeTokens = keywordParse(raw_include.current.value);
         const excludeTokens = keywordParse(raw_exclude.current.value);
 
+        // begin loading
         setLoading(true);
         
-        const recentRunDir = await SearchFiles(corpus,includeTokens,excludeTokens,subCorp_name.current.value, progress, setProgress,winnowDir);
-        
-        // if succesful we add the most recent corpus directory handle into the state to be used in the results page.
-        if (recentRunDir){
+        // send off to do the search, then set the created results directory in the global state
+        await search(corpus,includeTokens,subCorp_name.current.value,winnowDir, updateProgCount).then((recentRunDir) => {
             dispatch({ type: "RECENT RUN CHANGE", payload: recentRunDir});
-
-        }else {
-            alert("Something went wrong and we have not dispatched");
-            // TODO Dispatch an error here, or some other form of error handling that keeps this from going to results page in the handle Submit.
-        }
+        });
         
+        if (!recentRunDir){
+            alert("There was an error in searching, please try again or contact a developer");
+        }
+      
     }
 
     // parses comma seperated keywords into an array and trims whitespaces
@@ -126,8 +128,9 @@ export default function SearchForm() {
         event.preventDefault();
         console.log(  "This is our file:");
         // grabs a directory
-        const fileHandle = await showDirectoryPicker()
-        
+        // CHANGE BACK TO DIRECTORY PICKER
+        var fileHandle = await showDirectoryPicker();
+        console.log(fileHandle);
         // updates the global state to pass this handle around
         corpusUpdate(fileHandle);
         verifyPermission(fileHandle, true);
@@ -138,6 +141,20 @@ export default function SearchForm() {
         
     };
 
+    const metaFilePicker = async(event) => {
+        event.preventDefault();
+        console.log(  "This is our file:");
+        // grabs a directory
+        const fileHandle = await showDirectoryPicker()
+        
+        // updates the global state to pass this handle around
+        setMetaFile(fileHandle);
+        verifyPermission(fileHandle, true);
+        // Changes button text to represent the user selection
+        // TODO check if there is a 'react' way of doing this. 
+        document.getElementById("metadata").innerHTML = fileHandle.name;
+
+    }
 
     return (
         <div>
@@ -146,9 +163,9 @@ export default function SearchForm() {
                 ? <div>
                     
                     {!flag &&
-                     <div>
+                     <div className = "loaderContainer">
                         <div className="loader"></div>
-                         <p>Compiling files, {progress} files read</p>
+                         <p>Searching files, {progress} files searched</p>
                      </div>}
                     
                     </div>
@@ -161,13 +178,20 @@ export default function SearchForm() {
                     {/* create form */}
                     <div className="formContainer h-50">
                         <form className="form-div mx-auto" onSubmit={handleSubmit}>
-                            <button id = "corpus" className="form-input" onClick= {filePicker}> Pick Corpus</button>
-                           {/* <button id = "destCorpus" className="form-input" onClick= {destPicker}> Pick Corpus
-                            </button>*/}
+                            <button type = "button" id = "corpus" className="form-input" onClick= {filePicker}> Pick Corpus</button>
+                         
+                              <button
+                              type = "button"
+                                className = "form-input"
+                               id = "metadata"
+                               onClick = {metaFilePicker}>
+                                Metadata (optional)
+                            </button>
                             <input 
                                  className="form-input"
                                  ref={subCorp_name}
-                                 placeholder="Subcorpi Name"> 
+                                 placeholder="Results Name">
+                                     
                              </input>
                             <input
                                 className="form-input"
@@ -180,6 +204,7 @@ export default function SearchForm() {
                                 ref={raw_exclude}
                                 placeholder="Exclude Terms">
                             </input>
+                          
                             {/* submission button, uses onClick event to upload to server */}
                             <button type="submit" id="submit-btn" className="btn btn-success">
                                 submit

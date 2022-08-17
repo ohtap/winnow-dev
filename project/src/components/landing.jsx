@@ -3,20 +3,15 @@
     within the diredtory. 
 */
 
-
 import { useNavigate, useLocation} from "react-router-dom";
 // import styles from main page, and auth.css
 import "./searchform.css";
-import { promises, useContext, useRef, useState,} from "react";
-import SearchFiles from "./searchFunc";
-
-import { AuthContext } from "../context/AuthContext";
-import { changeWDirectory } from "../context/AuthActions";
+import { useContext, useState,} from "react";
+import { AuthContext } from "../context/AuthContext.jsx";
 export default function Landing() {
 
     const [directory,setDirectory] = useState();
     const navigate = useNavigate();
-    const location = useLocation();
 
     const { dispatch } = useContext(AuthContext);
 
@@ -59,6 +54,8 @@ export default function Landing() {
             console.log("dispatching payload");
             dispatch({ type: "DIRECTORY CHANGE", payload: directory });
             navigate("/search");
+            //protoSearch();
+            
         }  
 
         /*if (permission) {

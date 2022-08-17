@@ -1,3 +1,4 @@
+import protoSearch from "./search.jsx";
 
 /*
 Notes to self: 
@@ -161,7 +162,7 @@ export default async function SearchFiles (corpus_dir, includeTokens, excludeTok
         console.log(wordCounter);
         await wordCountWriter.write(JSON.stringify(wordCounter)).then(() => wordCountWriter.close());
     }
-   
+
     
     // TODO: comment, and needs to return a falsy if no matching files. 
     const findFiles = async(ref) => {
@@ -195,7 +196,7 @@ export default async function SearchFiles (corpus_dir, includeTokens, excludeTok
             console.log("now saving files"); 
 
         // create a subcorpus folder in the working directory
-            console.log(winnowDir);
+          //  console.log(winnowDir);
             
         for (const file of subCorpus) {
             // grab file from corpus dir
@@ -275,27 +276,46 @@ export default async function SearchFiles (corpus_dir, includeTokens, excludeTok
 
    */
 
+   const invertSearch = async(wordCounter) => {
+    var map = null;
+    // attempts to read in a search map and word counter
+    var map = await readMap();
+    var wordCounter = await readWordCounter();
+  // if no map exists then we build one, otherwise we roll with the existing one
+    map  = map ? map : await buildMap(wordCounter);
+    // executing the actual search
+    const filesToSave = await findFiles(map);
+    console.log("this is word counter inside search");
+    console.log(wordCounter);
+    return {filesToSave,wordCounter};
+
+   }
+
+// AHO CORASICK SEARCH IMPLEMENTATION 
+// ######################################################################################################################################
+
+
+
+// #######################################################################################################################################
+
+
+
    const main = async () => {
         // creating subcorpus directory
         const subCorpusHandle = await createSubCorpus();
         //creating an object for tracking word counts. 
-        var wordCounter = {};
+    
         // creating metadata object 
         const aboutFile = {};
 
-        var map = null;
-        // attempts to read in a search map and word counter
-        var map = await readMap();
-        var wordCounter = await readWordCounter();
-       
-
-        // if no map exists then we build one, otherwise we roll with the existing one
-        map  = map ? map : await buildMap(wordCounter);
-        // executing the actual search
-        const filesToSave = await findFiles(map);
         
+        // running the search function
+       const {filesToSave,wordCounter}  = await invertSearch();
+
+       console.log(wordCounter);
         // if the search returns something
         if (filesToSave){
+            // Specific to a full dictionary of wordCounts 
             const keywordCounts = await fetchWordCounts(filesToSave,wordCounter,subCorpusHandle);
             // save the files
             await saveFiles(filesToSave,subCorpusHandle);
@@ -314,3 +334,4 @@ export default async function SearchFiles (corpus_dir, includeTokens, excludeTok
 
     return  main();
 }
+

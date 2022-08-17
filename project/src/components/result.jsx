@@ -3,12 +3,14 @@ import { AuthContext } from "../context/AuthContext";
 import { useContext } from "react";
 
 export default function DisplayResult() {
-
-  const {winnowDir, dispatc,recentRunDir} = useContext(AuthContext);
+  const {winnowDir, dispatch,recentRunDir} = useContext(AuthContext);
 
   const readResults = async() => {
+    console.log(recentRunDir);
+    const data_Handle = await recentRunDir.getDirectoryHandle("Winnow_data");
+    console.log(data_Handle);
 
-    const aboutFileHandle = await recentRunDir.getFileHandle("about.txt");
+    const aboutFileHandle = await data_Handle.getFileHandle("about.txt");
     const aboutFile = await aboutFileHandle.getFile();
 
     console.log(aboutFile);
@@ -22,7 +24,7 @@ export default function DisplayResult() {
   
   return (
     <div>
-      <p> Recent Run Dir Name {recentRunDir.name}</p>
+      <p> Results: {recentRunDir.name}</p>
       <pre id = "result"> Loading File</pre>
     </div>
   );
