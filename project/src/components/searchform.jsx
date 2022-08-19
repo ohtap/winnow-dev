@@ -10,7 +10,7 @@
 // import styles from main page, and auth.css
 import search from "./search.jsx";
 import "./searchform.css";
-import { useContext, useRef, useState} from "react";
+import { useContext, useRef, useState,useEffect} from "react";
 import { useNavigate } from "react-router";
 
 import { AuthContext } from "../context/AuthContext";
@@ -27,10 +27,14 @@ export default function SearchForm() {
     // used to render how many files have been searched
     var [progress, setProgress] = useState(0);
     const [metaFile, setMetaFile] = useState();
-
     // used to navigate to a new page
     const navigate = useNavigate();
 
+    useEffect(() => {
+        if(!winnowDir){
+            navigate("/");
+        }
+    },[]);
     // saving state variables
     const raw_include = useRef();
     const raw_exclude = useRef();
@@ -81,7 +85,10 @@ export default function SearchForm() {
         
         // checks if corpus has been selected then runs search then navigates to the results pag
          if (corpus){
-         runSearch().then(() => navigate("/results"));
+            console.log("Navigating to results");
+         runSearch().then(() => {
+            console.log("navigating")
+            navigate("/results")});
         } else {
             alert("please select a corpus");
         }
@@ -94,15 +101,21 @@ export default function SearchForm() {
 
         // begin loading
         setLoading(true);
+
+        //DELETE BELOW AFTER TESTING
+        dispatch({ type: "RECENT RUN CHANGE", payload: corpus});
         
-        // send off to do the search, then set the created results directory in the global state
+
+        // UNCOMMENT BELOW AFTER DONE TESTING
+        
+      /*  // send off to do the search, then set the created results directory in the global state
         await search(corpus,includeTokens,subCorp_name.current.value,winnowDir, updateProgCount).then((recentRunDir) => {
             if (!recentRunDir){
                 alert("There was an error in searching, please try again or contact a developer");
             }
-            
+
             dispatch({ type: "RECENT RUN CHANGE", payload: recentRunDir});
-        });
+        });*/
         
        
       
@@ -130,9 +143,8 @@ export default function SearchForm() {
         event.preventDefault();
         console.log(  "This is our file:");
         // grabs a directory
-        // CHANGE BACK TO DIRECTORY PICKER
         var fileHandle = await showDirectoryPicker();
-        console.log(fileHandle);
+       
         // updates the global state to pass this handle around
         corpusUpdate(fileHandle);
         verifyPermission(fileHandle, true);
@@ -157,6 +169,10 @@ export default function SearchForm() {
         document.getElementById("metadata").innerHTML = fileHandle.name;
 
     }
+
+
+    // navigates to home if we dont have a winnow directory 
+
 
     return (
         <div>

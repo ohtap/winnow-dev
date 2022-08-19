@@ -10,6 +10,7 @@
   "dependencies": {
     "neat-csv": "^7.0.0",
     "react": "^18.0.0",
+    "react-collapsed": "^3.3.2",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.3.0"
   },

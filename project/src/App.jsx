@@ -13,6 +13,7 @@ import SearchForm from './components/searchform';
 
 function App() {
 
+  console.log("routing in app");
 
   return (
     
