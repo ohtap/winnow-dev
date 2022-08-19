@@ -17,42 +17,125 @@ p.login-text {
     color: #8C1515;
     padding-bottom: 2vh;
 }
-
-.form-div {
-    width: 40%;
+.page1{
+    width: 100%;
+    height: 100vh ;
+    align-items: center;
 }
 
-.form-input {
+.page0{
+    margin-top:3%;
+    width: 100%;
+    height: 20vh;
+    border: solid;
+    border-radius: 15px;
+    border-color: rgba(89, 16, 16, 0.706); 
+    background-color: rgb(247, 241, 230);
+}
+
+.header1 {
+width: auto;
+}
+
+.header0{
+    display: none;
+}
+
+
+.form-div1 {
+    width: 40%;
+    margin:auto;
+}
+
+.form-div0{
+    width: 100%; 
+}
+
+.form-input1 {
     background-color: #8C1515;
     color:white;
     border-radius: 10px;
     border: none;
     width: 100%;
     display: inline-block;
-
-    
     height: 60px;
     margin-bottom: 3vh;
 }
 
-.form-input::placeholder {
-    color: white;
+.form-input0 {
+    background-color: #ffffff;
+    color:rgb(72, 50, 22);
+    border-radius: 10px;
+    border: none;
+    width: 20%;
+    display: inline; 
+    height: 60px;
+    margin-bottom: 3vh;
+    margin: 10px;
+    text-align: center;
+}
+.form-button1{
+    background-color: #8C1515;
+    color:white;
+    border-radius: 10px;
+    border: none;
+    width: 100%;
+    display: inline-block;
+    height: 60px;
+    margin-bottom: 3vh;
 }
 
-.form-input:focus {
-    background-color: #8C1515;
+.form-button0{
+    background-color: rgb(72, 50, 22);
+    color:white;
+    border-radius: 30px;
+    border: none;
+    width: 14%;
+    display: inline; 
+    height: 60px;
+    margin-bottom: 3vh;
+    margin: 10px;
+}
+
+.form-input1::placeholder {
+    color: white;
+}
+.form-input0::placeholder {
+    color: rgb(72, 50, 22);
+}
+
+.form-button0:hover{
+    background-color: #7e1212;
     color:white;
 }
 
-#submit-btn {
-    width: 100%;
-    height: 55px;
-    border-radius: 10px;
+.form-input1:focus {
+    background-color: #8C1515;
+    color:white;
+}
+.form-input0:focus {
 }
 
-.submitButton {
-    width: 75%;
-    height: 17%;
+
+.submitButton1 {
+    background-color: #087e1d;
+    color: #f3f3f3;
+    width: 25%;
+    height: 60px;
+    display:inline-block;
+    margin:auto;
+    border: none;
+    border-radius:10px
+}
+.submitButton0 {
+    background-color: #087e1d;
+    color: #f3f3f3;
+    width: 15%;
+    height: 60px;
+    margin-top: 2vh;
+    margin-left: 84%;
+    border: none;
+    border-radius:10px
 }
 
 .inputArea {
@@ -60,16 +143,31 @@ p.login-text {
     height: 20%;
 }
 
-.formContainer {
+.formContainer1 {
     display: block;
 }
 
-.loaderContainer {
+.formContainer0{
+    display: block;
+    color: azure;
+}
+
+.loaderContainer1 {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 80vh;
+    font-size: 3vh;
+}
+
+.loaderContainer0 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2vh;
+    height: 25vh;
     font-size: 3vh;
 }
 

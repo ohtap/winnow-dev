@@ -23,7 +23,7 @@ function App() {
       <div className="h-75">
         <Routes>
           <Route exact path="/" element = {<Landing/>}/>
-          <Route path = "/search" element = {<SearchForm/>}/>
+          <Route path = "/search" element = {<SearchForm fromLanding={1} />}/>
           <Route path = "/results" element = {<DisplayResult/>}/>
           {/* add error component here */}
         </Routes>

@@ -1,8 +1,5 @@
 
-// For the purposes of this prototype we will be writing functions that recursively traverse the given folder system. 
-// the first milestone is to traverse the folder and print out a list of all the file paths in the folder: 
-//  i.e  
-//  winnow/corpus_1/file_1.txt, winnow/corpus_2/file_1.txt , etc. 
+// 
 export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount){
   
     // adapted from the recursive scan function provided in the mozilla documentation https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle

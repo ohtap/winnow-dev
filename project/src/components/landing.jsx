@@ -97,11 +97,11 @@ return (
         <p className = "text-center login-text fs-5"> If you do not have a Winnow directoy, go ahead and make a new folder. Preferably someplace easy to locate such as your desktop or documents. </p>
     </div>
     {/* create form */}
-    <div className="formContainer h-50">
-        <form className="form-div mx-auto" onSubmit={handleSubmit}>
-            <button id = "workingDirectory" className="form-input" onClick= {filePicker}> Pick Winnow Directory</button>
+    <div className="formContainer1 h-50">
+        <form className="form-div1 mx-auto" onSubmit={handleSubmit}>
+            <button id = "workingDirectory" className="form-input1" onClick= {filePicker}> Pick Winnow Directory</button>
             {/* submission button,*/}
-            <button type="submit" id="submit-btn" className="btn btn-success">
+            <button type="submit" id="submit-btn" className="submitButton1">
                 submit
             </button>
         </form>

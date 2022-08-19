@@ -1,5 +1,6 @@
 /* 
- * Queries user to search their selected corpus, Sends user entered information to the SearchFunc component to run the actual search
+ * Queries user to search their selected corpus,
+ Sends user entered information to the SearchFunc component to run the actual search
  * 
  * -Ben Ruland
  */
@@ -15,7 +16,8 @@ import { useNavigate } from "react-router";
 
 import { AuthContext } from "../context/AuthContext";
 
-export default function SearchForm() {
+// takes in a 1 if called from the landing page, and a 0 if called from elsewhere within the site. 
+export default function SearchForm({fromLanding}) {
 
     
     // stores the selected directories to be passed on
@@ -29,6 +31,8 @@ export default function SearchForm() {
     const [metaFile, setMetaFile] = useState();
     // used to navigate to a new page
     const navigate = useNavigate();
+
+
 
     useEffect(() => {
         if(!winnowDir){
@@ -44,18 +48,7 @@ export default function SearchForm() {
     const {winnowDir, dispatch} = useContext(AuthContext);
 
 
-    /* IMPLEMENTATION THOUGHTS:
-        Metadata
-
-        add an optional metadata field to the form (ideal if we use some different form colors), make sure it only takes the proper file format
-
-        pass all of this to a seperate metadata function. 
-        // How does one even process an excel sheet? 
-            some info on that, can use others libraries
-            could also try and read it in myself? .. any way to do it in a general fashion? 
-               well collecting could be possible but the treatment for each column is totally different dependent on the col data. 
-                will get all the data into a 2d array 
-*/
+ 
     const updateProgCount = ()=>{
         setProgress(progress+= 1);
     }
@@ -88,6 +81,7 @@ export default function SearchForm() {
             console.log("Navigating to results");
          runSearch().then(() => {
             console.log("navigating")
+            setLoading(false);
             navigate("/results")});
         } else {
             alert("please select a corpus");
@@ -102,20 +96,15 @@ export default function SearchForm() {
         // begin loading
         setLoading(true);
 
-        //DELETE BELOW AFTER TESTING
-        dispatch({ type: "RECENT RUN CHANGE", payload: corpus});
         
-
-        // UNCOMMENT BELOW AFTER DONE TESTING
-        
-      /*  // send off to do the search, then set the created results directory in the global state
+       // send off to do the search, then set the created results directory in the global state
         await search(corpus,includeTokens,subCorp_name.current.value,winnowDir, updateProgCount).then((recentRunDir) => {
             if (!recentRunDir){
                 alert("There was an error in searching, please try again or contact a developer");
             }
 
             dispatch({ type: "RECENT RUN CHANGE", payload: recentRunDir});
-        });*/
+        });
         
        
       
@@ -123,7 +112,7 @@ export default function SearchForm() {
 
     // parses comma seperated keywords into an array and trims whitespaces
 
-    // TODO add wildcards. 
+    // TODO add handling of strict search characters and other modifiers 
     const keywordParse = (keywords) => {
         const tokens = keywords.split(',');
         const cleantokens = [];
@@ -165,13 +154,9 @@ export default function SearchForm() {
         setMetaFile(fileHandle);
         verifyPermission(fileHandle, true);
         // Changes button text to represent the user selection
-        // TODO check if there is a 'react' way of doing this. 
         document.getElementById("metadata").innerHTML = fileHandle.name;
 
     }
-
-
-    // navigates to home if we dont have a winnow directory 
 
 
     return (
@@ -181,50 +166,49 @@ export default function SearchForm() {
                 ? <div>
                     
                     {!flag &&
-                     <div className = "loaderContainer">
+                     <div className = {`loaderContainer${fromLanding}`}>
                         <div className="loader"></div>
                          <p>Searching files, {progress} files searched</p>
                      </div>}
-                    
                     </div>
-                :<div className="w-100 vh-100 align-items-center source-sans border main" >
+                :<div className={`page${fromLanding}`} >
                     {/* text div, stores "Sign in" etc text from top of the page */}
-                    <div className="w-auto">
+                    <div className={`header${fromLanding}`}>
                         <h1 className="text-center">Winnow</h1>
                         <p className="text-center login-text fs-5">Select your Corpus and search terms to begin</p>
                     </div>
                     {/* create form */}
-                    <div className="formContainer h-50">
-                        <form className="form-div mx-auto" onSubmit={handleSubmit}>
-                            <button type = "button" id = "corpus" className="form-input" onClick= {filePicker}> Pick Corpus</button>
+                    <div className={`formContainer${fromLanding} h-50`}>
+                        <form className={`form-div${fromLanding}`} onSubmit={handleSubmit}>
+                            <button type = "button" id = "corpus" className={`form-button${fromLanding}`} onClick= {filePicker}> Pick Corpus</button>
                          
                               <button
                               type = "button"
-                                className = "form-input"
+                                className = {`form-button${fromLanding}`}
                                id = "metadata"
                                onClick = {metaFilePicker}>
-                                Metadata (optional)
+                             Metadata 
                             </button>
                             <input 
-                                 className="form-input"
+                                 className={`form-input${fromLanding}`}
                                  ref={subCorp_name}
                                  placeholder="Results Name">
                                      
                              </input>
                             <input
-                                className="form-input"
+                                className={`form-input${fromLanding}`}
                                 ref={raw_include}
                                 placeholder="Search Terms">
                             </input>
                             
                             <input
-                                className="form-input"
+                                className={`form-input${fromLanding}`}
                                 ref={raw_exclude}
                                 placeholder="Exclude Terms">
                             </input>
                           
                             {/* submission button, uses onClick event to upload to server */}
-                            <button type="submit" id="submit-btn" className="btn btn-success">
+                            <button type="submit" id="submit-btn" className={`submitButton${fromLanding}`}>
                                 submit
                             </button>
                         </form>

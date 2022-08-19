@@ -10,7 +10,7 @@ import AuthReducer from "./AuthReducer";
 const INITIAL_STATE = {
     winnowDir: null,
     recentRunDir: null,
-    runResults: true,
+
     error: false
 };
 
@@ -24,7 +24,6 @@ export const AuthContextProvider = ({ children }) => {
             value={{
                 winnowDir: state.winnowDir,
                 recentRunDir: state.recentRunDir,
-                runResults:state.runResults,
                 error: state.error,
                 dispatch
             }}>
