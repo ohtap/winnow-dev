@@ -6,8 +6,6 @@
  */
 
 
-// TODO :  ADD READING, SAVING FILES, flags and functionality. 
-
 // import styles from main page, and auth.css
 import search from "./search.jsx";
 import "./searchform.css";
@@ -104,6 +102,7 @@ export default function SearchForm({fromLanding}) {
             }
 
             dispatch({ type: "RECENT RUN CHANGE", payload: recentRunDir});
+        setProgress(0);
         });
         
        
@@ -159,6 +158,7 @@ export default function SearchForm({fromLanding}) {
     }
 
 
+    // Most html components below pull from the props to determine their CSS styling. 
     return (
         <div>
             {/* Conditionally rendering a loading screen or the search form*/}

@@ -1,5 +1,15 @@
-
-// 
+/**
+ * search looks through every file in the selected directory (and its subdirectories)
+ * this function maintains a count of occurences for each keyword.
+ * Finally it saves the all the files containing at least one keyword, maintaining original file structure when doing so,
+ * then saves a file "about.txt" containing data regarding the search under a folder named "winnow_data"
+ * @param  {directoryHandle} corpus_dir - the directory handle, with read permissions,which we are searching
+ * @param  {array<String>} searchWords - key word tokens to be searched for 
+ * @param  {String} subCorp_name - name for the folder within which the results will be saved
+ * @param  {directoryHandle} winnowDir - a directory handle, with read/write permissions granted, used to access where the search results will be stored
+ * @param  {updateProgCount} function - a function which updates the state in the caller to reflect how many files have been processed
+ * @return {directoryHandle}      a directory handle to the results directory created within this function
+ */
 export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount){
   
     // adapted from the recursive scan function provided in the mozilla documentation https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle
@@ -18,7 +28,7 @@ export default async function search(corpus_dir, searchWords, subCorp_name, winn
       }
       
 
-// bc apparently js doesnt have one?! everything is O(1) time for this. Unlike the array implementation
+// 
 class Queue {
     constructor () {
         this.items = {};

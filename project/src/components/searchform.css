@@ -1,6 +1,7 @@
-/* File: auth.css
- * Author(s): Ben Ruland
+/* Searchform.css
  *
+ * All classes ending with a 1 are styled for the main search page
+ * All classes ending with a 0 are for the embeded search component which appears at the top of the screen.
  */
  input:focus::placeholder {
     color: transparent;
