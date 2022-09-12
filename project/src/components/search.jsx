@@ -4,7 +4,7 @@
  * Finally it saves the all the files containing at least one keyword, maintaining original file structure when doing so,
  * then saves a file "about.txt" containing data regarding the search under a folder named "winnow_data"
  * @param  {directoryHandle} corpus_dir - the directory handle, with read permissions,which we are searching
- * @param  {array<String>} searchWords - key word tokens to be searched for 
+ * @param  {Array[String]} searchWords - key word tokens to be searched for 
  * @param  {String} subCorp_name - name for the folder within which the results will be saved
  * @param  {directoryHandle} winnowDir - a directory handle, with read/write permissions granted, used to access where the search results will be stored
  * @param  {updateProgCount} function - a function which updates the state in the caller to reflect how many files have been processed
@@ -30,6 +30,9 @@ export default async function search(corpus_dir, searchWords, subCorp_name, winn
 
 // 
 class Queue {
+    /**
+     * @constructor
+     */
     constructor () {
         this.items = {};
         this.headIndex = 0;
@@ -91,7 +94,11 @@ class AC_search {
         
     };
 
-
+    /**
+     * 
+     * @param {String} s - The keyword to be added into the trie
+     * @param {String} wordID - The identifier for the word, typically the word itself to be stored in the leaf node
+     */
     AddString(s,wordID){
 
         var curVertex = this.root;
@@ -347,9 +354,3 @@ const main = async () => {
 
 return main();
 }
-
-// TODO 
-// write an Aho exclude which just returns a bool on its search
-// then initialize the exclude inside the init for the aho include.  Then we can double up and check against ignore words
-// then write something to check for a "quotations" string and write strict search options for that. 
-// - perhaps to do this we pass in a series of objects instead of strings, and the objects are already parsed with their respective search adjusters
