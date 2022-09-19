@@ -13,7 +13,8 @@ import { useContext, useRef, useState,useEffect} from "react";
 import { useNavigate } from "react-router";
 
 import { AuthContext } from "../context/AuthContext";
-
+//import { parse } from '@fast-csv/parse';
+import * as Papa from "papaparse";
 // takes in a 1 if called from the landing page, and a 0 if called from elsewhere within the site. 
 export default function SearchForm({fromLanding}) {
 
@@ -73,7 +74,8 @@ export default function SearchForm({fromLanding}) {
     const handleSubmit = async (event) => {
         // prevents page refresh
         event.preventDefault();
-        
+        runSearch();
+        /*
         // checks if corpus has been selected then runs search then navigates to the results pag
          if (corpus){
             console.log("Navigating to results");
@@ -83,18 +85,19 @@ export default function SearchForm({fromLanding}) {
             navigate("/results")});
         } else {
             alert("please select a corpus");
-        }
+        }*/
     };
 
     // parses keywords, sets loading flag, then runs the actual search and save process
     const runSearch = async() => {
-        const includeTokens = keywordParse(raw_include.current.value);
+       /* const includeTokens = keywordParse(raw_include.current.value);
         const excludeTokens = keywordParse(raw_exclude.current.value);
 
         // begin loading
         setLoading(true);
 
         
+        // TODO pass prop containing the metaData file. 
        // send off to do the search, then set the created results directory in the global state
         await search(corpus,includeTokens,subCorp_name.current.value,winnowDir, updateProgCount).then((recentRunDir) => {
             if (!recentRunDir){
@@ -104,8 +107,15 @@ export default function SearchForm({fromLanding}) {
             dispatch({ type: "RECENT RUN CHANGE", payload: recentRunDir});
         setProgress(0);
         });
-        
-       
+        */
+
+        // TODO Uncomment above - move below to proper position
+        // TODO - create a config object to pass in - allowing headers and possible dynamic typing. 
+
+        const file = await metaFile.getFile();
+        const meta = await file.text();
+
+        console.log(Papa.parse(meta));
       
     }
 
@@ -129,10 +139,11 @@ export default function SearchForm({fromLanding}) {
     // picks a directory to use 
     const filePicker = async(event) => {
         event.preventDefault();
-        console.log(  "This is our file:");
+       
         // grabs a directory
         var fileHandle = await showDirectoryPicker();
-       
+        console.log(  "This is our file:");
+        console.log(fileHandle);
         // updates the global state to pass this handle around
         corpusUpdate(fileHandle);
         verifyPermission(fileHandle, true);
@@ -145,13 +156,15 @@ export default function SearchForm({fromLanding}) {
 
     const metaFilePicker = async(event) => {
         event.preventDefault();
-        console.log(  "This is our file:");
+      
         // grabs a directory
-        const fileHandle = await showDirectoryPicker()
+        const [fileHandle] = await showOpenFilePicker()
         
         // updates the global state to pass this handle around
         setMetaFile(fileHandle);
-        verifyPermission(fileHandle, true);
+        console.log( fileHandle );
+        console.log(fileHandle.kind);
+        //verifyPermission(fileHandle, true);
         // Changes button text to represent the user selection
         document.getElementById("metadata").innerHTML = fileHandle.name;
 

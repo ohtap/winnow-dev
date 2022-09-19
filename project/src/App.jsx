@@ -9,7 +9,7 @@ import NavBar from "./components/navbar/navbar";
 import Landing from './components/landing';
 import DisplayResult from './components/result';
 import SearchForm from './components/searchform';
-
+import SearchHistory from './components/history/history';
 
 function App() {
 
@@ -25,6 +25,7 @@ function App() {
           <Route exact path="/" element = {<Landing/>}/>
           <Route path = "/search" element = {<SearchForm fromLanding={1} />}/>
           <Route path = "/results" element = {<DisplayResult/>}/>
+          <Route path = "/history" element = {<SearchHistory/>}/>
           {/* add error component here */}
         </Routes>
         
