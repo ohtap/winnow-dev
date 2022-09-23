@@ -64,7 +64,7 @@ var {dispatch,recentRunDir} = useContext(AuthContext);
   const keyWords = Object.keys(keyWordCounts);
 
   // getting the div in which to place the element and creating the table element
-    const div = document.getElementById("keyWordContent");
+    const div = document.getElementById("wordContent");
 
     // removing any existing table on reloads.
     while(div.firstChild){
@@ -110,14 +110,14 @@ var {dispatch,recentRunDir} = useContext(AuthContext);
          <pre className = "aboutTxt">{about} </pre>
       </div>
 
-    <div className="keyWordsContainer">
+    <div className="wordsContainer">
         <div className="header" {...getToggleProps()}>
             Key Word Frequencies
           <div className = "collapseExpand">{isExpanded ? '-' : '+'}</div>
           
         </div>
         <div {...getCollapseProps()}>
-          <div className="keyWordsContent" id = "keyWordContent">
+          <div className="wordsContent" id = "wordContent">
           </div>
         </div>
   </div>
