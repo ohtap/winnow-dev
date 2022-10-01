@@ -75,7 +75,7 @@ export default function SearchForm({fromLanding}) {
         // prevents page refresh
         event.preventDefault();
         runSearch();
-        /*
+        
         // checks if corpus has been selected then runs search then navigates to the results pag
          if (corpus){
             console.log("Navigating to results");
@@ -85,12 +85,12 @@ export default function SearchForm({fromLanding}) {
             navigate("/results")});
         } else {
             alert("please select a corpus");
-        }*/
+        }
     };
 
     // parses keywords, sets loading flag, then runs the actual search and save process
     const runSearch = async() => {
-       /* const includeTokens = keywordParse(raw_include.current.value);
+        const includeTokens = keywordParse(raw_include.current.value);
         const excludeTokens = keywordParse(raw_exclude.current.value);
 
         // begin loading
@@ -99,7 +99,7 @@ export default function SearchForm({fromLanding}) {
         
         // TODO pass prop containing the metaData file. 
        // send off to do the search, then set the created results directory in the global state
-        await search(corpus,includeTokens,subCorp_name.current.value,winnowDir, updateProgCount).then((recentRunDir) => {
+        await search(corpus,includeTokens,subCorp_name.current.value,winnowDir, updateProgCount, excludeTokens).then((recentRunDir) => {
             if (!recentRunDir){
                 alert("There was an error in searching, please try again or contact a developer");
             }
@@ -107,15 +107,15 @@ export default function SearchForm({fromLanding}) {
             dispatch({ type: "RECENT RUN CHANGE", payload: recentRunDir});
         setProgress(0);
         });
-        */
+        
 
         // TODO Uncomment above - move below to proper position
         // TODO - create a config object to pass in - allowing headers and possible dynamic typing. 
 
-        const file = await metaFile.getFile();
-        const meta = await file.text();
+        //const file = await metaFile.getFile();
+        //const meta = await file.text();
 
-        console.log(Papa.parse(meta));
+        //console.log(Papa.parse(meta));
       
     }
 

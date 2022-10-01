@@ -10,7 +10,7 @@
  * @param  {updateProgCount} function - a function which updates the state in the caller to reflect how many files have been processed
  * @return {directoryHandle}      a directory handle to the results directory created within this function
  */
-export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount){
+export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount, ignoreWords){
   
     // adapted from the recursive scan function provided in the mozilla documentation https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle
     async function* getFilesRecursively (entry, pathname) {
@@ -75,6 +75,8 @@ class Vertex {
     SuffixLink = -1;
     WordID = -1;
     EndWordLink = -1;
+    // -1 to denote there is no ignore term after this leaf, 1 to denote there is one, and 2 to denote this leaf is the ignore term itself
+    IgnoreTerm = -1;
 }
 
 // we can in the future tear this thing open and implement it such that it creates
@@ -107,7 +109,6 @@ class AC_search {
 
             // if a vertex with this edge does not exist we add it
             if (!this.Trie[curVertex].Children || !this.Trie[curVertex].Children.hasOwnProperty(c)){
-
                 const edge = new Vertex();
                 edge.SuffixLink = -1;
                 edge.Parent = curVertex; 
@@ -126,6 +127,38 @@ class AC_search {
         this.Trie[curVertex].WordID = wordID;
         this.WordsLength.push(s.length);
     }
+
+    AddIgnoreString(s,wordID){
+        var curVertex = this.root;
+        for (var i = 0; i < s.length; i++){
+            var c = s[i];
+
+            // if a vertex with this edge does not exist we add it
+            if (!this.Trie[curVertex].Children || !this.Trie[curVertex].Children.hasOwnProperty(c)){
+                // if the current Vertex is a leaf we add to it that we have an ignore word
+                if(this.Trie[curVertex].Leaf){
+                    this.Trie[curVertex].IgnoreTerm = 1;
+                }
+                const edge = new Vertex();
+                edge.SuffixLink = -1;
+                edge.Parent = curVertex; 
+                edge.Char = c;
+                this.Trie.push(edge);
+    
+                this.Trie[curVertex].Children[c] = this.size; 
+                this.size ++;
+            }
+            //updating curVertex, may need to be cast to a number
+            curVertex = this.Trie[curVertex].Children[c];
+        }
+
+        // mark the end of the word 
+        this.Trie[curVertex].Leaf = true;
+        this.Trie[curVertex].WordID = wordID;
+        this.Trie[curVertex].IgnoreTerm = 2;
+        this.WordsLength.push(s.length);
+    }
+    
 
     CalcSuffLink(vertex){
         // below are the two degenerate cases, the root and its immediate children
@@ -184,8 +217,52 @@ class AC_search {
         }
     }
 
+
+    // TODO Adding ignore terms 
+    /*
+        To Accomplish this we must first add a field in the Trie to hold wether or not there is an ignore term
+        at each word end. 
+
+        if we come upon a word that contains an ignore term we must carry along some data. 
+        first we must have some kind of flag to denote that we are on the lookout to see if further words are found from this prefix 
+        then we must set the flag in the second while loop upon finding a match, I think we might need to ignore any smaller words here, as we don't want to keep looping in the find words
+        loop - possible that we could and just set the flag once 
+
+        we will need to pass along some information - first and foremost we want to store the word we had found
+        from there we will run search as normal - if we go up a suffix link then we will clear the flag and process the saved word as it was a valid word
+        otherwise we will first check to see if the current State is an ignore term if so we wipe the flag, skip the rest of the while loop then continue processing
+        
+        note we will continue to dive down the tree - it is possible someone searched "win*"" entered an ignore for "wind" 
+        but also entered "window" 
+
+        here we would get to "win" and see it is a word that matches our prefix - but we also see it has an ignore term so we must continue
+        from there we get to "wind" we see we hit our ignore term so we drop the flag and ignore adding "win", then we keep moving and see we have found 'window" - there are no more 
+        flags so we add the term. 
+
+    */
+
+    /* Strict searching 
+        We need a way to strict search by default. That is search for only keywords and not prefixes. 
+        first we will keep track of the start of each word by keeping track of the last seen space. This is to prevent issues with
+        finding words in the middle of other words 
+
+        next we will say - if we hit a word in the Trie - if its Prefix Search flag is set to false then we will check if the next character is a space/punct 
+        if so - we then check that the substring from start to end matches the Trie's stored word if so we have a strict match
+        if any of those failed then we move on as normal
+
+        if instead the word in the trie has its flag set to true we treat it like we would now - (except we work to find the word itself not just the prefix) 
+        - we go on and apply the check for ignore terms - we also will walk till the punct/space and store that word instead of just the prefix. 
+
+        Note - Do We Double Count Words in this case ? Like if someone entered win* and wind - do we double count wind ? 
+        if we follow the ignore terms - and just ensure that we clear the flag if we find an additional word - then we are great. 
+        JUST NEED TO GET MORE CERTAIN ON HOW IT KNOWS ITS A WORD - SEE EndWordLink .. ?
+    */
     // actually searching the text
+
+    // NOTE TO SELF - test ignore terms now - need to add connect Ignore Box from UI to this backend. 
     ProcessString(text){
+        var ignoreFound = -1;
+        var storedWord = "";
         var currentState = this.root;
 
         var result = 0;
@@ -197,42 +274,67 @@ class AC_search {
                 if (this.Trie[currentState].Children.hasOwnProperty(curChar)){
                     currentState = this.Trie[currentState].Children[curChar];
                     break;
+                }else if (ignoreFound == 1){
+                    // add word and update its count
+                    var word = (this.Trie[currentState].WordID);
+                    console.log("this is our word");
+                    console.log(word);
+                    var wordCounts = this.aboutSearch["wordCounts"];
+                    wordCounts[word] = wordCounts[word] || 0;
+                    wordCounts[word] += 1;
+                    ignoreFound = -1;
                 }
 
                 // otherwise we will folow the suffix links, where we will either find the char
                 // or make it to the root where we can stop
-
+                // TO ADD Dealing with checking the stored words and adding that word/clearing flags of ignored words
                 if(currentState == this.root) break;
                 currentState = this.Trie[currentState].SuffixLink;
             }
             var checkState = currentState;
 
-            // finding word matches
+            // finding word matches NOTE The following was normally in a while loop, but we do not care for looking to find multiple words within each word, so we will leave it for now
+            // TODO It doesnt need to be in the while loop, but change would involve restructuring all the breaks. Leaving in while loop is the easiest thing to do until we hit a stable version.
             while(true){
                 // finding the possible word from the state
                 checkState = this.Trie[checkState].EndWordLink;
 
                 // if we make it to root we havent got a match
                 if(checkState == this.root){ break;}
-
+                console.log("found word");
                 // if we get here we have a match, we can handle it how we want to in the future
+                // since we have a match we check if the vertex has an ignore term flag 
+                if(this.Trie[checkState].IgnoreTerm == 2){
+                    // we hit the ignore term - just clear the flags and break to ignore it
+                    ignoreFound = -1;
+                    storedWord = "";
+                    console.log("hit ignore term");
+                    break;
+                }else if (this.Trie[checkState].IgnoreTerm == 1){
+                    // we know there is a future ignore term lets set the flags, and break to avoid entering the data just yet
+                    ignoreFound = 1;
+                    storedWord = this.Trie[checkState].WordID;
+                    break;
+                }
+                
                 // which will ideally be to check it against any exclude words, then continue a count before processing the file. 
 
                 // Add it to the wordCount dictionary, more work will need to be done in the recursion if we wish to obtain seperate counts 
                 // for each folder
+                // Adds word and updates its count.
                 var word = (this.Trie[checkState].WordID);
                 var wordCounts = this.aboutSearch["wordCounts"];
                 wordCounts[word] = wordCounts[word] || 0;
                 wordCounts[word]+= 1;
 
                 result ++;
-                
-                
+                break;
+            
                 // we can add a field to the leaf of vertex that denotes if it is a strict search word
                 // then check for it here and if so then we can run a check if it is a substring and ignore if so.
                 
-                // finds matched patterns of smaller length 
-                 checkState = this.Trie[checkState].SuffixLink;
+                // finds matched patterns of smaller length  - note we don't care for this right now. 
+                // checkState = this.Trie[checkState].SuffixLink;
 
             }
         }
@@ -297,7 +399,9 @@ const prepACSearch = () =>{
     for (var i = 0; i < searchWords.length; i ++){
         search.AddString(searchWords[i].toLowerCase(),searchWords[i].toLowerCase());
     }
-
+    for(var i = 0; i < ignoreWords.length; i++){
+        search.AddIgnoreString(ignoreWords[i].toLowerCase(), ignoreWords[i].toLowerCase());
+    }
     search.prepareSearch();
    
     return search;
