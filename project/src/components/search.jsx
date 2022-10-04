@@ -246,9 +246,9 @@ class AC_search {
         first we will keep track of the start of each word by keeping track of the last seen space. This is to prevent issues with
         finding words in the middle of other words 
 
-        next we will say - if we hit a word in the Trie - if its Prefix Search flag is set to false then we will check if the next character is a space/punct 
-        if so - we then check that the substring from start to end matches the Trie's stored word if so we have a strict match
-        if any of those failed then we move on as normal
+        next we will say - if we hit a word in the Trie - if its Wildcard Search flag is set to false then we will check if the next character is a space/punct 
+        if so - 
+        
 
         if instead the word in the trie has its flag set to true we treat it like we would now - (except we work to find the word itself not just the prefix) 
         - we go on and apply the check for ignore terms - we also will walk till the punct/space and store that word instead of just the prefix. 
@@ -267,6 +267,9 @@ class AC_search {
 
         var result = 0;
 
+        var wordBegin = 0;
+
+        //###### TODO find the place to mark the beginning of the word. Then 
         for (var j = 0; j < text.length; j++){
             // calculating new state in trie
             while(true){
@@ -287,13 +290,12 @@ class AC_search {
 
                 // otherwise we will folow the suffix links, where we will either find the char
                 // or make it to the root where we can stop
-                // TO ADD Dealing with checking the stored words and adding that word/clearing flags of ignored words
                 if(currentState == this.root) break;
                 currentState = this.Trie[currentState].SuffixLink;
             }
             var checkState = currentState;
 
-            // finding word matches NOTE The following was normally in a while loop, but we do not care for looking to find multiple words within each word, so we will leave it for now
+            // finding word matches NOTE 
             // TODO It doesnt need to be in the while loop, but change would involve restructuring all the breaks. Leaving in while loop is the easiest thing to do until we hit a stable version.
             while(true){
                 // finding the possible word from the state
@@ -317,7 +319,6 @@ class AC_search {
                     break;
                 }
                 
-                // which will ideally be to check it against any exclude words, then continue a count before processing the file. 
 
                 // Add it to the wordCount dictionary, more work will need to be done in the recursion if we wish to obtain seperate counts 
                 // for each folder
