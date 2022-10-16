@@ -35,7 +35,23 @@ export default function Landing() {
         // The user did not grant permission, return false.
         return false;
       }
+      
     
+    // Serves the altogether important task of verifying the Winnow specific folders exits and if not, it creates these folders.
+    // Current structre :
+    /*
+      Winnow Dir:
+        Search Logs:
+            *Winnow creates a folder for every search within *
+        Winnow Data:
+            wordGroups.json  *A file containing all the user created word groups*
+                
+    */
+    const confirmFileStructure = async(winnowDir) => {
+        const searchLogs  = await winnowDir.getDirectoryHandle("Search Logs", {create:true})
+        const winnow_Data = await winnowDir.getDirectoryHandle("Winnow Data", {create:true})
+        await winnow_Data.getFileHandle("wordGroups.json",{create:true})
+    }
     
 
     const handleSubmit = async (event) => {
@@ -53,7 +69,8 @@ export default function Landing() {
             // Updating the context state. 
             console.log("dispatching payload");
             dispatch({ type: "DIRECTORY CHANGE", payload: directory });
-            navigate("/search");
+            await confirmFileStructure(directory).then(() => { navigate("/search")});
+        
             //protoSearch();
             
         }  

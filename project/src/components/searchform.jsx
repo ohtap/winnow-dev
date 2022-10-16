@@ -74,7 +74,6 @@ export default function SearchForm({fromLanding}) {
     const handleSubmit = async (event) => {
         // prevents page refresh
         event.preventDefault();
-        runSearch();
         
         // checks if corpus has been selected then runs search then navigates to the results pag
          if (corpus){
@@ -129,7 +128,7 @@ export default function SearchForm({fromLanding}) {
         for (var token of tokens){
             // cleaning tokens 
             token = token.toLowerCase();
-            token= token.replace(/[,."!?@#$%&*]+/g, " ").trim();
+            token= token.replace(/[,."!?@#$%&]+/g, " ").trim();
 
             cleantokens.push(token.trim());
         }

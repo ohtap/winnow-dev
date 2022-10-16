@@ -4,15 +4,15 @@ import { useContext,useState,useEffect } from "react";
 import useCollapse from 'react-collapsed';
 import SearchForm from "./searchform";
 import "./result.css";
-
+import { useNavigate } from "react-router";
 
 
 export default function DisplayResult() {
 
   // TODO rewrite recentRunDir to better reflect that it is whatever run we wish to display on the results page. 
   // BETTER: figure out how to actually pass the props because really this should just be a prop. 
-
-var {dispatch,recentRunDir} = useContext(AuthContext);
+  const navigate = useNavigate();
+var {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
   const { getCollapseProps, getToggleProps, isExpanded } = useCollapse();
 
   // state for about readout
@@ -26,10 +26,10 @@ var {dispatch,recentRunDir} = useContext(AuthContext);
 
   // returns an object containing all of the JSON data written in the about.txt file of the recently searched corpus
   const getAboutData = async() => {
-    const data_Handle = await recentRunDir.getDirectoryHandle("Winnow_data");
+   //const data_Handle = await recentRunDir.getDirectoryHandle("Winnow_data");
 
 
-    const aboutFileHandle = await data_Handle.getFileHandle("about.txt");
+    const aboutFileHandle = await recentRunDir.getFileHandle("about.txt");
     var aboutFile = await aboutFileHandle.getFile();
     aboutFile = await aboutFile.text();
 
@@ -94,6 +94,27 @@ var {dispatch,recentRunDir} = useContext(AuthContext);
     div.appendChild(tbl);
   }
 
+  /*
+    deletes the entries data from the search logs and redirects to the search history page. 
+  */
+  const deleteResults = async() => {
+      const logs = await winnowDir.getDirectoryHandle("Search Logs");
+      console.log(logs)
+      console.log(recentRunDir.name)
+      const result = await logs.getDirectoryHandle(recentRunDir.name)
+      console.log(result)
+      try {
+        for await(let value of result.keys()){
+          await result.removeEntry(value)
+        }
+      await logs.removeEntry(result.name)
+      navigate("/history")
+      }
+      catch(err) {
+        console.log(err)
+      }
+  }
+
   const main = async() =>{
       const about_data = await getAboutData();
       displayAbout(about_data);
@@ -120,8 +141,11 @@ var {dispatch,recentRunDir} = useContext(AuthContext);
           <div className="wordsContent" id = "wordContent">
           </div>
         </div>
-  </div>
 
+  </div>
+  <div>
+          <button onClick = {deleteResults}>Delete Results</button>
+        </div>
     </div>
     
   );

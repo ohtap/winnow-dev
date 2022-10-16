@@ -2,21 +2,20 @@
 import { AuthContext } from "../../context/AuthContext";
 import { useContext,useState,useEffect } from "react";
 import useCollapse from 'react-collapsed';
-import "./searchEntry.css";
-import SearchEntry from "./searchEntry";
+import "./searchTerms.css";
 import { renderMatches } from "react-router";
+import WordGroup from "./wordGrouping";
 
-
-export default function SearchHistory() {
+export default function SearchTerms() {
 
   // TODO rewrite recentRunDir to better reflect that it is whatever run we wish to display on the results page. 
   // BETTER: figure out how to actually pass the props because really this should just be a prop. 
 
-let {winnowDir} = useContext(AuthContext);
+var {winnowDir} = useContext(AuthContext);
   const { getCollapseProps, getToggleProps, isExpanded } = useCollapse();
 
   // state for about readout
-  var [about, setAbout] = useState("");
+  let [about, setAbout] = useState("");
     const [entries,setEntries] = useState([])  ;
   //runs the main function, prevents multiple reruns of main
   useEffect( () => {
@@ -29,7 +28,7 @@ let {winnowDir} = useContext(AuthContext);
     console.log(winnowDir);
     const entryCont = [];
     
-    let historyFolder = await winnowDir.getDirectoryHandle("Search Logs");
+    var historyFolder = await winnowDir.getDirectoryHandle("Search Logs");
     for await (const [key, value] of historyFolder.entries()) {
         if(value.kind != "file"){
         entryCont.push(value);}
@@ -58,12 +57,10 @@ let {winnowDir} = useContext(AuthContext);
   return (
 
    <div>
-    {
+    
+    <WordGroup groupName = {"hello"}/>
 
-        entries.map((entry)=>(
-            <SearchEntry key = {entry.name} data = {entry} />
-        ))
-    }
+    
    </div>
 
     

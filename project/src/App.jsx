@@ -10,7 +10,7 @@ import Landing from './components/landing';
 import DisplayResult from './components/result';
 import SearchForm from './components/searchform';
 import SearchHistory from './components/history/history';
-
+import SearchTerms from './components/searchTerms/searchTerms';
 function App() {
 
   console.log("routing in app");
@@ -23,6 +23,7 @@ function App() {
       <div className="h-75">
         <Routes>
           <Route exact path="/" element = {<Landing/>}/>
+          <Route path = "/terms" element = {<SearchTerms/>}/>
           <Route path = "/search" element = {<SearchForm fromLanding={1} />}/>
           <Route path = "/results" element = {<DisplayResult/>}/>
           <Route path = "/history" element = {<SearchHistory/>}/>

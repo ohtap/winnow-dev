@@ -26,13 +26,19 @@ export default function SearchEntry({data}) {
     main();
   },[data])
 
+
+
+  const changeDel = () => {
+    setDel(!del);
+  }
+
   // returns an object containing all of the JSON data written in the about.txt file of the recently searched corpus
-
+  
   const getAboutData = async() => {
-    const data_Handle = await data.getDirectoryHandle("Winnow_data");
+   // const data_Handle = await data.getDirectoryHandle("Winnow_data");
 
 
-    const aboutFileHandle = await data_Handle.getFileHandle("about.txt");
+    const aboutFileHandle = await data.getFileHandle("about.txt");
     var aboutFile = await aboutFileHandle.getFile();
     aboutFile = await aboutFile.text();
 
@@ -126,8 +132,6 @@ export default function SearchEntry({data}) {
   }
 
   const main = async() =>{
-    console.log("getting search list");
-    
       const about_data = await getAboutData();
       displayAbout(about_data);
       createKeyWordTable(about_data["wordCounts"]);

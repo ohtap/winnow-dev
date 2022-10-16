@@ -27,11 +27,14 @@ function NavBar() {
             </div>
             {/* navigation links div */}
            { winnowDir ? <div className="d-flex w-50 fs-3 pb-2 justify-content-center">
-                <Link to="/search" className="text-decoration-none px-4">Search</Link>
                 <Link to="/" className="text-decoration-none px-4">Home</Link>
-                <Link to="/history" className="text-decoration-none px-4">Search History</Link>
+                <Link to="/search" className="text-decoration-none px-4">Search</Link>
+                <Link to="/terms" className="text-decoration-none px-4">Search-Terms</Link>
+                <Link to="/history" className="text-decoration-none px-4">History</Link>
+                
           
-            </div> : <p></p>}
+            </div> :       
+            <div className="d-flex w-50 fs-3 pb-2 justify-content-center"><Link to="/" className="text-decoration-none px-4">Home</Link></div>          }
         </nav>
     );
 }
