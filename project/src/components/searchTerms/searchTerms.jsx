@@ -5,6 +5,7 @@ import useCollapse from 'react-collapsed';
 import "./searchTerms.css";
 import { renderMatches } from "react-router";
 import WordGroup from "./wordGrouping";
+import "./wordGrouping.css"
 
 export default function SearchTerms() {
 
@@ -12,57 +13,54 @@ export default function SearchTerms() {
   // BETTER: figure out how to actually pass the props because really this should just be a prop. 
 
 var {winnowDir} = useContext(AuthContext);
-  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse();
+let [wordsMap,setWordsMap] = useState([]);
+let [render, setRender] = useState(0);
+    // obj containing the keyword groups - key is groupname - value is list of words to search with
 
-  // state for about readout
-  let [about, setAbout] = useState("");
-    const [entries,setEntries] = useState([])  ;
+
   //runs the main function, prevents multiple reruns of main
   useEffect( () => {
-    main();
+   main();
   },[winnowDir])
 
-  // returns an object containing all of the JSON data written in the about.txt file of the recently searched corpus
-  const getSearchList = async() => {
-    console.log("in search List");
-    console.log(winnowDir);
-    const entryCont = [];
-    
-    var historyFolder = await winnowDir.getDirectoryHandle("Search Logs");
-    for await (const [key, value] of historyFolder.entries()) {
-        if(value.kind != "file"){
-        entryCont.push(value);}
-        // take the value and grab the about json object from it
-        // add this and the name to props and create a searchEntry component with them
-        // somehow display this component on the page. 
 
-        console.log({ key, value })
-    }
-    setEntries(entryCont);
-    console.log("succesfully set entries");
-  }
+  // Loads up the JSON object contaning all keyword groups 
+  const getInfo = async() =>{
+    const dataDir = await winnowDir.getDirectoryHandle("Winnow Data");
+    const wordGroups= await dataDir.getFileHandle("wordGroups.json");
+    let wordGroupsFile = await wordGroups.getFile()
+    wordGroupsFile = await wordGroupsFile.text()
+    wordGroupsFile = await JSON.parse(wordGroupsFile)
+    
+    let wordsOutcome = Object.keys(await wordGroupsFile)
+    setWordsMap(wordsOutcome)
+
+   // console.log(wordGroupsFile)
+    
+}
 
   const main = async() =>{
-
-    console.log("getting search list");
-    getSearchList();
-     /* const about_data = await getAboutData();
-      displayAbout(about_data);
-      createKeyWordTable(about_data["wordCounts"]);*/
-
+   getInfo();
   }
-  
+  const createNew = () => {
 
+  
+        wordsMap.unshift("New Word Group")
+         setRender(render+1);
+        
+    }
 
   return (
+    <div>
+        <button onClick= {createNew}>Create New</button>
+        {
+            wordsMap.map(((word)=>(
+                <WordGroup key = {word} groupName = {word} />
+            )))
+        }
 
-   <div>
-    
-    <WordGroup groupName = {"hello"}/>
 
-    
    </div>
-
     
   );
 }

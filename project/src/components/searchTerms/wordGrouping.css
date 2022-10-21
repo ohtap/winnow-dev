@@ -1,0 +1,44 @@
+.wordGroup {
+    border-top: none;
+    background-color: rgb(247, 241, 230);
+
+    color: rgb(72, 50, 22);
+    font-weight: 600;
+
+
+
+    width: 75%;
+    margin: auto;
+    margin-top: 2%;
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-bottom: 5px;
+
+}
+
+.title {
+    text-align: center;
+}
+
+.label1 {
+    color: rgb(28, 19, 6);
+    font-weight: 500;
+    opacity: 50%;
+}
+
+.editButton {
+ 
+    float: right;
+    border-radius: 10px;
+    background-color: burlywood;
+}
+
+.content {
+    display:block;
+    background-color: white;
+    width:75%;
+    border: 1px solid #ccc;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 1px 6px;
+}
