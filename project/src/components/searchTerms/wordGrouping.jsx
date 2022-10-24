@@ -1,9 +1,69 @@
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from '../../context/AuthContext';
 import "./wordGrouping.css"
-export default function WordGroup({ groupName }) {
-    let { winnowDir } = useContext(AuthContext);
+export default function WordGroup(props) {
 
+    const {words: origWords, groupName, deleteEntry,save, setWords: setOrigWords} = props;
+    const [words, setWords] = useState(origWords);
+
+    const [edit,setEdit] = useState(false);
+
+    /* Update words when origWords changes */
+    useEffect (()=> {
+         setWords(origWords);
+        }, [origWords]);
+
+
+    const changeEdit= () =>{
+        setEdit(!edit);
+        }
+
+    
+    const saveTerm = (event) => {
+        setEdit(!edit)
+        setOrigWords(words)
+        save()
+    }
+    return (
+
+        <div>
+            
+            {
+                edit ?
+                    <div className="wordGroup">
+                        <button className="editButton" onClick={saveTerm} >Save</button>
+                        <button className = "deleteButton" onClick = {deleteEntry}>Delete</button>
+                        <div className="title">
+                            <input id = "title" value={groupName}></input>
+                        </div>
+                        <div>
+                            <label  className="label1">Search Terms:</label> <textarea id = "searchWords" 
+                                                onChange={(event) => setWords(event.target.value)}>{words}  
+                            </textarea>
+                        </div>
+                    </div> :
+
+                    <div className="wordGroup">
+                        <button className="editButton" onClick={changeEdit}>Edit</button>
+                        <div className="title">
+                            <p id = "titleNE"> {groupName}</p>
+                        </div>
+                        <div>
+                            <label className="label1">Search Terms:</label> <p>{words}</p>
+                        </div>
+                    </div>
+
+            }
+            </div>
+        
+
+
+    )
+}
+
+/*
+    let { winnowDir } = useContext(AuthContext);
+onBlur={() => saveWords(words)}
     let [wordGroupsHandle,setWordGroupsHandle] = useState()
     let [wordGroupsObj, setWordGroupsObj] = useState()
     let [words, setWords] = useState();
@@ -42,9 +102,7 @@ export default function WordGroup({ groupName }) {
     }
    
 
-    const changeEdit= () =>{
-        setEdit(!edit);
-        }
+
 
     const save = async() => {
         
@@ -110,41 +168,3 @@ export default function WordGroup({ groupName }) {
     Save this stuff to the file and change back to normal text on save click. 
     */
 
-    let p = "<p> yo yo<mark> yo this </mark> is whats up </p>"
-
-    return (
-
-        <div>
-            {
-                deleted ? <></> : <div>
-            {
-                edit ?
-                    <div className="wordGroup">
-                        <button className="editButton" onClick={save}>Save</button>
-                        <button className = "deleteButton" onClick = {deleteEntry}>Delete</button>
-                        <div className="title">
-                            <input id = "title" defaultValue={name}></input>
-                        </div>
-                        <div>
-                            <label  className="label1">Search Terms:</label> <span id = "searchWords" className = "content" role="textbox" contentEditable>{words}</span>
-                        </div>
-                    </div> :
-
-                    <div className="wordGroup">
-                        <button className="editButton" onClick={changeEdit}>Edit</button>
-                        <div className="title">
-                            <p id = "titleNE"> {name}</p>
-                        </div>
-                        <div>
-                            <label className="label1">Search Terms:</label> <p>{words}</p>
-                        </div>
-                    </div>
-
-            }
-            </div>
-        }
-
-        </div>
-
-    )
-}
