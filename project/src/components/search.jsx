@@ -430,6 +430,7 @@ const aboutWriter = async(historyFolder,data,results) => {
     console.log(historyFolderCopy);
     var resultsFolder = await historyFolderCopy.getDirectoryHandle(subCorp_name, {create:true});
 
+    data["Searched Words"] = searchWords
     // write about file
     const aboutHandle = await resultsFolder.getFileHandle("about.txt",{create:true});
     const aboutWriter = await aboutHandle.createWritable();

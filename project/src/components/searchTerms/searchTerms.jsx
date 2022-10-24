@@ -17,6 +17,7 @@ let [render, setRender] = useState(0);
 let [wordGroupsHandle, setWordGroupsHandle] = useState({})
 const [wordGroups, setWordGroups] = useState([]);
 const [wordsOnDel, setWordsOnDel] = useState([])
+const [newTitle, setNewTitle] = useState();
 useEffect(
    () => {
    getWordGroups();
@@ -28,8 +29,8 @@ useEffect(
     // obj containing the keyword groups - key is groupname - value is list of words to search with
 
   const createNew = () => {
-  
-        wordGroups.unshift({groupName: "New Word Group", words: "comma seperated search terms here"})
+
+        wordGroups.unshift({groupName: newTitle, words:""})
          setRender(render+1);
         
     }
@@ -122,6 +123,7 @@ useEffect(
   return (
     <div>
       <button onClick= {createNew}>Create New</button>
+      <textarea id = "newTitle" placeholder="New Group Name" onChange={(event) => setNewTitle(event.target.value)}> </textarea>
       {
         
         wordGroups.map((group, idx) => {

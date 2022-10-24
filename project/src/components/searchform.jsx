@@ -15,6 +15,7 @@ import { useNavigate } from "react-router";
 import { AuthContext } from "../context/AuthContext";
 //import { parse } from '@fast-csv/parse';
 import * as Papa from "papaparse";
+import WordGroup from "./searchTerms/wordGrouping.jsx";
 // takes in a 1 if called from the landing page, and a 0 if called from elsewhere within the site. 
 export default function SearchForm({fromLanding}) {
 
@@ -26,28 +27,61 @@ export default function SearchForm({fromLanding}) {
     // loading flag, used to conditionally render a loading screen while searching
     const [loading, setLoading] = useState(false);
     // used to render how many files have been searched
-    var [progress, setProgress] = useState(0);
+    let [progress, setProgress] = useState(0);
+    // keyWord groups
+    let [wordGroups,setWordGroups] = useState();
+
     const [metaFile, setMetaFile] = useState();
     // used to navigate to a new page
     const navigate = useNavigate();
 
 
 
-    useEffect(() => {
+    useEffect( () => {
+        snagWordGroups();
+        console.log("snagging some stufff")
+       
         if(!winnowDir){
             navigate("/");
         }
     },[]);
+
+
     // saving state variables
     const raw_include = useRef();
     const raw_exclude = useRef();
     const subCorp_name = useRef();
+    const selected_Group = useRef();
 
     // grabing the working dir
     const {winnowDir, dispatch} = useContext(AuthContext);
 
 
- 
+    const snagWordGroups = async()=>{
+        const dataDir = await winnowDir.getDirectoryHandle("Winnow Data");
+        const wordGroupsHandle= await dataDir.getFileHandle("wordGroups.json");
+
+        let wordGroupsFile = await wordGroupsHandle.getFile()
+        wordGroupsFile = await wordGroupsFile.text()
+        const wordGroupsdata = await JSON.parse(wordGroupsFile)
+
+        console.log(wordGroupsdata)
+
+        setWordGroups(wordGroupsdata)
+        let select = document.getElementById("groupSelect");
+
+        let groupKeys = Object.keys(wordGroupsdata)
+        groupKeys.unshift(" ")
+        for(let i = 0; i < groupKeys.length; i++) {
+            let opt = groupKeys[i];
+            let el = document.createElement("option");
+            el.textContent = opt;
+            el.value = opt;
+            select.appendChild(el);
+        }
+    }
+
+
     const updateProgCount = ()=>{
         setProgress(progress+= 1);
     }
@@ -72,6 +106,7 @@ export default function SearchForm({fromLanding}) {
 
     // Runs the form submission
     const handleSubmit = async (event) => {
+  
         // prevents page refresh
         event.preventDefault();
         
@@ -89,7 +124,12 @@ export default function SearchForm({fromLanding}) {
 
     // parses keywords, sets loading flag, then runs the actual search and save process
     const runSearch = async() => {
-        const includeTokens = keywordParse(raw_include.current.value);
+
+        let groupWords = ""
+        if (selected_Group.current.value != " "){
+            groupWords = wordGroups[selected_Group.current.value];
+        }
+        const includeTokens = keywordParse(raw_include.current.value +"," + groupWords);
         const excludeTokens = keywordParse(raw_exclude.current.value);
 
         // begin loading
@@ -194,13 +234,13 @@ export default function SearchForm({fromLanding}) {
                         <form className={`form-div${fromLanding}`} onSubmit={handleSubmit}>
                             <button type = "button" id = "corpus" className={`form-button${fromLanding}`} onClick= {filePicker}> Pick Corpus</button>
                          
-                              <button
+                             {/* <button
                               type = "button"
                                 className = {`form-button${fromLanding}`}
                                id = "metadata"
                                onClick = {metaFilePicker}>
                              Metadata 
-                            </button>
+                    </button>*/}
                             <input 
                                  className={`form-input${fromLanding}`}
                                  ref={subCorp_name}
@@ -213,6 +253,10 @@ export default function SearchForm({fromLanding}) {
                                 placeholder="Search Terms">
                             </input>
                             
+                            <label> Search Group:</label>
+                            <select id = "groupSelect" ref = {selected_Group}>
+                            </select>
+
                             <input
                                 className={`form-input${fromLanding}`}
                                 ref={raw_exclude}
