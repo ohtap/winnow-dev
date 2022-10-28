@@ -34,7 +34,7 @@ export default function WordGroup(props) {
                         <button className="editButton" onClick={saveTerm} >Save</button>
                         <button className = "deleteButton" onClick = {deleteEntry}>Delete</button>
                         <div className="title">
-                            <input id = "title" value={groupName}></input>
+                            <p id = "title"> {groupName}</p>
                         </div>
                         <div>
                             <label  className="label1">Search Terms:</label> <textarea id = "searchWords" 

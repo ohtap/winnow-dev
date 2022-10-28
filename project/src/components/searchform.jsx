@@ -247,6 +247,7 @@ export default function SearchForm({fromLanding}) {
                                  placeholder="Results Name">
                                      
                              </input>
+                            {/* <p> Use the * symbol at the end of a term to search for any word with that prefix. (i.e fly* will find "fly","flying","flyers"... )</p>*/}
                             <input
                                 className={`form-input${fromLanding}`}
                                 ref={raw_include}

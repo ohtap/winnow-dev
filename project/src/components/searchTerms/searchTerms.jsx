@@ -72,12 +72,11 @@ useEffect(
       }
 
       newWordGroups.splice(idx, 1);
-      setWordsOnDel(newWordGroups)
-      saveOnDel()
+      saveOnDel(newWordGroups)
     };
 
 
-    const save = async() => {
+    const save = async(newWordGroups) => {
        
        
        /*if (title == "New Word Group"){
@@ -99,7 +98,7 @@ useEffect(
    }
 
 
-  const saveOnDel = async() => {
+  const saveOnDel = async(groupWords) => {
     
     /*if (title == "New Word Group"){
         alert("please change the title name before saving");
@@ -109,15 +108,15 @@ useEffect(
     // saves the object to the file system. 
     
     let saveData = {}
-    for (let i = 0; i< wordsOnDel.length; i++){
-       let name = wordsOnDel[i].groupName
-       let content = wordsOnDel[i].words
+    for (let i = 0; i< groupWords.length; i++){
+       let name = groupWords[i].groupName
+       let content = groupWords[i].words
        saveData[name] = content;
     }
 
     const writer = await wordGroupsHandle.createWritable();
     await writer.write(JSON.stringify(saveData,null,2)).then(() => writer.close());
-    setWordGroups(wordsOnDel)
+    setWordGroups(groupWords)
 }
 
   return (

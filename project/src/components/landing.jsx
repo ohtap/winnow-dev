@@ -50,6 +50,7 @@ export default function Landing() {
     const confirmFileStructure = async(winnowDir) => {
         const searchLogs  = await winnowDir.getDirectoryHandle("Search Logs", {create:true})
         const winnow_Data = await winnowDir.getDirectoryHandle("Winnow Data", {create:true})
+        const collections = await winnowDir.getDirectoryHandle("Winnow Collections", {create:true})
         await winnow_Data.getFileHandle("wordGroups.json",{create:true})
     }
     

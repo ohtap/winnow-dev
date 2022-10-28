@@ -18,16 +18,22 @@
 export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount, ignoreWords){
   
     // adapted from the recursive scan function provided in the mozilla documentation https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle
-    async function* getFilesRecursively (entry, pathname) {
+    async function* getFilesRecursively (entry, pathname, path) {
         if (entry.kind === 'file') {
           const file = await entry.getFile();
           if (file !== null) {
             file.relativePath = pathname;
+            file.pathArr = path;
             yield file;
           }
         } else if (entry.kind === 'directory') {
           for await (const handle of entry.values()) {
-            yield* getFilesRecursively(handle,(pathname + `/${handle.name}`));
+            let temp_path =  []
+            for (let f of path){
+                temp_path.push(f)
+            }
+            temp_path.push(handle.name)
+            yield* getFilesRecursively(handle,([pathname] + `/${handle.name}`),temp_path);
           }
         }
       }
@@ -384,6 +390,7 @@ class AC_search {
 
 }
 
+// TODO Understand better and adjust to ensure this saves our file/ folder into Data. 
 // This is currenty inefficient, we can reduce the workload by assuming we are starting out in the right directory and backing up recursively from there
 // but for now the simpler method works
 const saveFile = async (fileHandle,subCorp_handle) =>{
@@ -424,10 +431,17 @@ const createWinnowData = async(subCorp_handle) => {
     return destCorpus;
 }
 
+const checkandAddCorpus = async() => {
+    const collectionsHandle = await winnowDir.getDirectoryHandle("Winnow Collections");
+    const ourCollectionHandle = await collectionsHandle.getDirectoryHandle(corpus_dir.name,{create:true});
+
+    return ourCollectionHandle;
+}
+
 const aboutWriter = async(historyFolder,data,results) => {
     
     var historyFolderCopy = await checkHistory();
-    console.log(historyFolderCopy);
+    //console.log(historyFolderCopy);
     var resultsFolder = await historyFolderCopy.getDirectoryHandle(subCorp_name, {create:true});
 
     data["Searched Words"] = searchWords
@@ -473,9 +487,9 @@ const main = async () => {
     const search = prepACSearch();
 
     // creating the SubCorpus
-    //const subCorp_handle = await createSubCorpus();
+    const saveDestHandle = await checkandAddCorpus();
 
-    for await (const fileHandle of getFilesRecursively(corpus_dir, corpus_dir.name)) {
+    for await (const fileHandle of getFilesRecursively(corpus_dir, corpus_dir.name, [corpus_dir.name])) {
         // here we can feed the files to the search method. they each have the data necessary for searching and copying them into a new dir. 
        
         updateProgCount();
@@ -488,21 +502,23 @@ const main = async () => {
         // if we found a search word in the file
         if(success > 0){
 
-            var filePath = fileHandle.relativePath
+          //  console.log(fileHandle)
+          //  console.log(fileHandle.pathArr)
+            var filePath = fileHandle.pathArr
             
             // adding the file name to the results object
             // TODO - track down the path and find a good way attaching a folder name to this - thataway we can make a heirarchy of collections later on. 
-            results.push(fileHandle.name);
+            results.push({"fileName": fileHandle.name, "filePath" : filePath });
             fileCount += 1;
 
-            /*
+            
             // This bit is for actually saving the files - TODO make this an optional feature later. 
             try{
-                saveFile(fileHandle,subCorp_handle);
+                saveFile(fileHandle,saveDestHandle);
                 fileCount += 1;
             }catch(err){
                     console.log(err);
-                }*/
+                }
         }
       }
 
@@ -529,7 +545,7 @@ const main = async () => {
        
       viola. 
       */
-       console.log(results);
+      // console.log(results);
          var resultsFolder = await aboutWriter(historyFolder,search.aboutSearch,results);
 
         // write the results to the search history 

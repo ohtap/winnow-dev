@@ -54,7 +54,7 @@ width: auto;
 
 .form-input1 {
     background-color: #8C1515;
-    color:white;
+    color:rgb(17, 14, 14);
     border-radius: 10px;
     border: none;
     width: 100%;
@@ -150,7 +150,7 @@ width: auto;
 
 .formContainer0{
     display: block;
-    color: azure;
+    color: rgb(8, 10, 10);
 }
 
 .loaderContainer1 {

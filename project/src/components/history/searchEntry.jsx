@@ -53,7 +53,7 @@ export default function SearchEntry({data}) {
     var text = "";
     
     for (var key of Object.keys(aboutData)){
-      if (key === "wordCounts"){
+      if (key === "wordCounts" || key === "Searched Words"){
         //do nothing 
       }else {
         text += `${key}: ${aboutData[key]}    ` ;
@@ -144,7 +144,7 @@ export default function SearchEntry({data}) {
     <div>
     <div className="keyWordsContainer" id = {keyWordsContainer} onClick={goTo} >
 
-        <div> <pre className = "aboutTxt">{about} </pre></div>
+        <div> <p className = "aboutTxt">{about} </p></div>
         <div className = "expandButton" onClick={(e) => {collapse(e);} }> 
         <p  className = "expandLabel">KeyWords</p> </div>
      </div>
