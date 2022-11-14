@@ -6,7 +6,8 @@ import SearchForm from "./searchform";
 import "./result.css";
 import { useNavigate } from "react-router";
 import { createRoot } from "react-dom/client";
-import Highlighter from "react-highlight-words";
+//import Highlighter from "react-highlight-words";
+import Index from "./fullTextSearch";
 
 export default function DisplayResult() {
 
@@ -26,13 +27,87 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
   let [viewerContent,setViewerContent] = useState()
   let [fileList, setFileList] = useState({})
   let [keyWords, setKeyWords] = useState([])
+  let [marks, setMarks] = useState([])
   let [fileViewed,setFileViewed] =useState();
+  let [curMark, setCurMark] = useState(0);
 
   // /TODO: fix the multiple page run issue.
   //runs the main function, prevents multiple reruns of main
   useEffect( () => {
     main();
   },[recentRunDir])
+
+
+
+  const getHighlightData = async(fileName,fileText) => {
+    const aboutFileHandle = await recentRunDir.getFileHandle("about.txt");
+    var aboutFile = await aboutFileHandle.getFile();
+    aboutFile = await aboutFile.text();
+
+    const aboutData = JSON.parse(aboutFile);
+    let searchWords = (aboutData["Searched Words"])
+    console.log(searchWords)
+    let srch = new Index(true);
+    srch.add(fileName,fileText);
+
+    let result = srch.searchTxtIndex(searchWords) // assuming the keyWords actually works which would be nice
+  
+    console.log(result)
+
+    let newFileText = fileText
+    let entries = {};
+    try{
+     entries = result[fileName].sort(function(a,b){
+      if (a["start"] > b["start"]){
+        return 1;
+      }
+      if (a["start"] < b["start"]){
+        return -1;
+      }
+      return 0;
+    })}catch{
+      console.log("something failed in the highlight search")
+      setMarks(0)
+      setCurMark(0)
+      document.getElementById("textCont").innerHTML = fileText;
+      return;
+    }
+    console.log(entries)
+    let x = 0;
+    let newMarks = []
+    for (let entry of entries){
+      newFileText = newFileText.substring(0,entry["start"]) + "<mark id='" + x + "'>" + newFileText.substring(entry["start"],entry["start"] + entry["len"]) + "</mark>" + newFileText.substring(entry["start"]+entry["len"]);
+      x++;
+      newMarks.push(JSON.stringify(x));
+      for (let en of entries){
+        en["start"] += 19 + JSON.stringify(x).length;
+      }
+    }
+    setMarks(newMarks);
+    setCurMark(0);
+    //setViewerContent(newFileText)
+    let ourText = document.getElementById("textCont")
+    ourText.innerHTML = newFileText
+
+   console.log( document.getElementById("0"));
+    let tag = document.getElementById("0")
+    tag.scrollIntoView()
+    // add highlights here
+    // need to loop thru the text, somehow insert a <mark> tag see if it works? 
+  }
+
+  const scrollHighlights = () =>{
+    let nextMark = curMark+1;
+    if (curMark == (marks.length-1)){
+      nextMark = 0;
+      setCurMark(0)
+    }else{
+      setCurMark(curMark+1);
+    }
+    let tag = document.getElementById(JSON.stringify(curMark));
+    tag.scrollIntoView();
+   
+  }
 
   const fileToReader = async(event) => {
     event.preventDefault();
@@ -51,10 +126,17 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
     
     const file = await fileHandle.getFile();
     const fileText = await file.text();
-    console.log(fileText)
-    setViewerContent(fileText)
+    getHighlightData(fileHandle.name,fileText);
+  //  console.log("placing in pre")
+   // let pre = document.getElementById("interText")
+  //  console.log(pre);
+    //pre.innerHTML = fileText;
+
 
   }
+
+
+
   // returns an object containing all of the JSON data written in the about.txt file of the recently searched corpus
   const getAboutData = async() => {
    //const data_Handle = await recentRunDir.getDirectoryHandle("Winnow_data");
@@ -66,7 +148,8 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
 
     const aboutData = JSON.parse(aboutFile);
 
-    setKeyWords(Object.keys(aboutData["wordCounts"]));
+    setKeyWords((aboutData["Searched Words"]));
+
     const resultsFileHandle = await recentRunDir.getFileHandle("results.txt");
     const resultsFile = await resultsFileHandle.getFile();
     const resultsContent = await resultsFile.text();
@@ -80,13 +163,11 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
 
     // TODO FIGURE OUT WHY: every time I add a button it doesnt do anything when clicked - even when I harcode it as html. - otherwise we will be stuck bc we cannot nest forms. 
     // TO DO add folder heirarchies - look at the file path, parse it and keep grabbing entries within it. 
-    for (let i =0; i<resultsData.length && i < 100;i++){
+    for (let i =0; i<resultsData.length;i++){
       let fileName = resultsData[i].fileName;
       let filePath = resultsData[i].filePath
 
       fileList[fileName] = filePath;
-      // okay we parsed the file path to start with so we have an array. we just need to create a handle to the file from the array. 
-      // TODO figure out if we can push this into the ability to call a function - I tihnk I need to create an object in state and then the form will just have the key as the ID. 
       let file = document.createElement('button');
       file.innerText = fileName
       file.className = "fileButton"
@@ -196,15 +277,16 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
 
   return (
     <div>
-      <SearchForm fromLanding={0}/>
+     {/* <SearchForm fromLanding={0}/>*/}
       <div className="aboutSearch" id = "about">
-         <pre className = "aboutTxt">{about} </pre>
+         <p className = "aboutTxt">{about} </p>
       </div>
 
-    <div className="wordsContainer">
+   {/* <div className="wordsContainer">
         <div className="header" {...getToggleProps()}>
-            Key Word Frequencies
-          <div className = "collapseExpand">{isExpanded ? '-' : '+'}</div>
+            Key Word Frequencies 
+
+  <div className = "collapseExpand">{isExpanded ? '-' : '+'}</div>
           
         </div>
         <div {...getCollapseProps()}>
@@ -212,16 +294,21 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
           </div>
         </div>
 
-  </div>
+  </div>*/}
 
  
   <div className="files">
   <div id = "fileList" className="fileList"> 
   </div>
+  <div id = "scrollMarks">
+      <button className = "scrollBtn" onClick={scrollHighlights}> {curMark +1}/{marks.length} Next</button>
+  </div>
   <div id="testDiv" className="fileReader">
+
     <p>{fileViewed}</p>
-    <Highlighter id ="test" searchWords = {keyWords} textToHighlight={viewerContent}>
-    </Highlighter>
+  {/*  <Highlighter id ="test" searchWords = {keyWords} textToHighlight={viewerContent}>
+    </Highlighter>*/}
+    <p className = "textCont" id = "textCont">{viewerContent}</p>
   </div>
   </div>
  

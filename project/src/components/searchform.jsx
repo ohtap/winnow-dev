@@ -65,7 +65,6 @@ export default function SearchForm({fromLanding}) {
         wordGroupsFile = await wordGroupsFile.text()
         const wordGroupsdata = await JSON.parse(wordGroupsFile)
 
-        console.log(wordGroupsdata)
 
         setWordGroups(wordGroupsdata)
         let select = document.getElementById("groupSelect");

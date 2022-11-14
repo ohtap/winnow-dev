@@ -14,17 +14,19 @@
    margin-top: 5%;
    border-radius: 10px;
    text-align: center;
+ 
 }
 
 .aboutTxt {
     margin:auto;
     color: rgb(72, 50, 22);
     overflow-x: auto;
-    white-space: pre-wrap;
+    white-space: pre-line;
     white-space: -moz-pre-wrap;
     white-space: -pre-wrap;
     white-space: -o-pre-wrap;
     word-wrap: break-word;
+    max-height: 78px;
 }
 
 
@@ -56,6 +58,7 @@
 }
 
 .wordsContent {
+
     background-color: rgb(247, 241, 230);
     overflow: hidden;
     border-radius: 10px;
@@ -71,8 +74,12 @@
 }
 
 .fileReader{
-  width: 70%;
-  margin: 20px;
+  border: 1px solid rgb(130,124,97);
+  border-radius: 10px;
+  padding: 5px;
+  background-color: aliceblue;
+  min-width: 400px;
+  margin: 5%;
   overflow: auto;
   max-height: 600px;
 }
@@ -103,5 +110,15 @@
     height: 4vh;
   }
 
+  .textCont{
+    white-space: pre-wrap;
+  }
+
+  mark{
+    background-color: rgba(251, 243, 10, 0.745);
+  }
 
 
+.scrollBtn{
+  width:100px;
+}

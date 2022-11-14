@@ -13,6 +13,10 @@
 
 
 
+// ############################# Search Handlers ######################################################
+// these functions are responsible for taking the inputs and yielding the proper components necessary to utilize whatever search engine we are running. 
+
+import Index from "./fullTextSearch"
 //TODO - add a "files searched" field to be generated while searching and added into about.txt
 // TODO consider just creating an object with all this info and passing that, as the params are starting to get lengthy
 export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount, ignoreWords){
@@ -38,356 +42,22 @@ export default async function search(corpus_dir, searchWords, subCorp_name, winn
         }
       }
 
-      async function checkHistory (){
-        var historyFolder = await winnowDir.getDirectoryHandle("Search Logs", {create:true});
-        return historyFolder
-      }
+    // Returns the search logs folder or creates it if it does not exist
+    async function checkHistory (){
+    var historyFolder = await winnowDir.getDirectoryHandle("Search Logs", {create:true});
+    return historyFolder
+    }
 
 
 // 
-class Queue {
-    /**
-     * @constructor
-     */
-    constructor () {
-        this.items = {};
-        this.headIndex = 0;
-        this.tailIndex = 0;
-    }
 
-    enqueue(item){
-        this.items[this.tailIndex] = item;
-        this.tailIndex++;
-    }
+const saveFileGeneric = async(data, fileName, folderHandle) => {
+    let destHandle = folderHandle;
+    const fileHandle = await destHandle.getFileHandle(fileName, {create: true})
 
-    dequeue(){
-        const item = this.items[this.headIndex];
-        delete this.items[this.headIndex];
-        this.headIndex++;
-        return item;
-    }
+    const destWriter = await fileHandle.createWritable();
 
-    peek(){
-        return this.items[this.headIndex];
-    }
-    get length(){
-        return this.tailIndex - this.headIndex;
-    }
-
-}
-
-// implementing the Aho-Corasick search, adapted from the example provided by
-// https://www.toptal.com/algorithms/aho-corasick-algorithm
-
-// Vertexes serve as the nodes for the Trie that we construct in the Aho Corasik algorithm. 
-// TODO add some fields here for things like strict search, wild card, etc. 
-class Vertex {
-    constructor(){};
-
-    Children = {};
-    Leaf = false;
-    Parent = -1;
-    Char = '';
-    SuffixLink = -1;
-    WordID = -1;
-    EndWordLink = -1;
-    // -1 to denote there is no ignore term after this leaf, 1 to denote there is one, and 2 to denote this leaf is the ignore term itself
-    IgnoreTerm = -1;
-    WildCard = -1;
-}
-
-// we can in the future tear this thing open and implement it such that it creates
-// a sub aho corasick search trie and searches this trie to eliminate the exclude words.  
-class AC_search {
-    
-    Trie = [];
-    WordsLength = [];
-    size = 0;
-    root = 0;
-    aboutSearch = {};
-
-    constructor(){
-        this.Trie.push(new Vertex());
-        this.size++;
-        this.aboutSearch["wordCounts"] = {};
-        
-    };
-
-    /**
-     * 
-     * @param {String} s - The keyword to be added into the trie
-     * @param {String} wordID - The identifier for the word, typically the word itself to be stored in the leaf node
-     */
-    AddString(s,wordID){
-        let isWildCard = false
-        let curVertex = this.root;
-        for (let i = 0; i < s.length; i++){
-            if (s[i] == '*'){
-                isWildCard = true;
-                break;
-            }
-            let c = s[i];
-
-            // if a vertex with this edge does not exist we add it
-            if (!this.Trie[curVertex].Children || !this.Trie[curVertex].Children.hasOwnProperty(c)){
-                const edge = new Vertex();
-                edge.SuffixLink = -1;
-                edge.Parent = curVertex; 
-                edge.Char = c;
-                this.Trie.push(edge);
-    
-                this.Trie[curVertex].Children[c] = this.size; 
-                this.size ++;
-            }
-            //updating curVertex
-            curVertex = this.Trie[curVertex].Children[c];
-        }
-
-        // mark the end of the word 
-        this.Trie[curVertex].Leaf = true;
-        this.Trie[curVertex].WordID = wordID;
-        this.WordsLength.push(s.length);
-        if (isWildCard == true){
-            this.Trie[curVertex].WildCard = 1;
-            console.log("wildCARD!")
-        }
-    }
-
-    AddIgnoreString(s,wordID){
-        let curVertex = this.root;
-        for (let i = 0; i < s.length; i++){
-            var c = s[i];
-
-            // if a vertex with this edge does not exist we add it
-            if (!this.Trie[curVertex].Children || !this.Trie[curVertex].Children.hasOwnProperty(c)){
-                // if the current Vertex is a leaf we add to it that we have an ignore word
-                if(this.Trie[curVertex].Leaf){
-                    this.Trie[curVertex].IgnoreTerm = 1;
-                }
-                const edge = new Vertex();
-                edge.SuffixLink = -1;
-                edge.Parent = curVertex; 
-                edge.Char = c;
-                this.Trie.push(edge);
-    
-                this.Trie[curVertex].Children[c] = this.size; 
-                this.size ++;
-            }
-            //updating curVertex, may need to be cast to a number
-            curVertex = this.Trie[curVertex].Children[c];
-        }
-
-        // mark the end of the word 
-        this.Trie[curVertex].Leaf = true;
-        this.Trie[curVertex].WordID = wordID;
-        this.Trie[curVertex].IgnoreTerm = 2;
-        this.WordsLength.push(s.length);
-    }
-    
-
-    CalcSuffLink(vertex){
-        // below are the two degenerate cases, the root and its immediate children
-        if (vertex == this.root){
-            this.Trie[vertex].SuffixLink = this.root;
-            this.Trie[vertex].EndWordLink = this.root;
-            return;
-        }
-        if(this.Trie[vertex].Parent == this.root){
-            this.Trie[vertex].SuffixLink = this.root;
-            if (this.Trie[vertex].Leaf) {Trie[vertex].EndWordLink = vertex;}
-            else {this.Trie[vertex].EndWordLink = this.Trie[this.Trie[vertex].SuffixLink].EndWordLink;}
-            return;
-        }
-
-        // now we grab the suffix link for the parent of the vertex and the character of the current vertex. 
-        let curBetterVertex = this.Trie[this.Trie[vertex].Parent].SuffixLink;
-        let chVertex = this.Trie[vertex].Char;
-
-        // now we look for the maximum prefix for the vertex and its substring
-        while(true){
-
-            // if we find the char we update the suffix and break
-            if(this.Trie[curBetterVertex].Children.hasOwnProperty(chVertex)){
-                this.Trie[vertex].SuffixLink = this.Trie[curBetterVertex].Children[chVertex];
-                break;
-            }
-            
-            // otherwise continue to follow suffix links until we find a prefix or reach the root
-            if (curBetterVertex == this.root){
-                this.Trie[vertex].SuffixLink = this.root;
-                break;
-            }
-            curBetterVertex = this.Trie[curBetterVertex].SuffixLink;
-        }
-        
-        // now we update the end word link to the max length word
-        if (this.Trie[vertex].Leaf) {
-            this.Trie[vertex].EndWordLink = vertex;
-        }else {
-            this.Trie[vertex].EndWordLink = this.Trie[this.Trie[vertex].SuffixLink].EndWordLink;
-        }
-    }
-
-    prepareSearch(){
-        const vertexQueue = new Queue();
-        vertexQueue.enqueue(this.root);
-
-        while(vertexQueue.length > 0){
-            var curVertex = vertexQueue.dequeue();
-            this.CalcSuffLink(curVertex);
-
-            for (var key of Object.keys(this.Trie[curVertex].Children)){
-                vertexQueue.enqueue(this.Trie[curVertex].Children[key]);
-            }
-        }
-    }
-
-
-    // TODO Adding ignore terms 
-    /*
-        To Accomplish this we must first add a field in the Trie to hold wether or not there is an ignore term
-        at each word end. 
-
-        if we come upon a word that contains an ignore term we must carry along some data. 
-        first we must have some kind of flag to denote that we are on the lookout to see if further words are found from this prefix 
-        then we must set the flag in the second while loop upon finding a match, I think we might need to ignore any smaller words here, as we don't want to keep looping in the find words
-        loop - possible that we could and just set the flag once 
-
-        we will need to pass along some information - first and foremost we want to store the word we had found
-        from there we will run search as normal - if we go up a suffix link then we will clear the flag and process the saved word as it was a valid word
-        otherwise we will first check to see if the current State is an ignore term if so we wipe the flag, skip the rest of the while loop then continue processing
-        
-        note we will continue to dive down the tree - it is possible someone searched "win*"" entered an ignore for "wind" 
-        but also entered "window" 
-
-        here we would get to "win" and see it is a word that matches our prefix - but we also see it has an ignore term so we must continue
-        from there we get to "wind" we see we hit our ignore term so we drop the flag and ignore adding "win", then we keep moving and see we have found 'window" - there are no more 
-        flags so we add the term. 
-
-    */
-
-    /* Strict searching 
-        We need a way to strict search by default. That is search for only keywords and not prefixes. 
-        first we will keep track of the start of each word by keeping track of the last seen space. This is to prevent issues with
-        finding words in the middle of other words 
-
-        next we will say - if we hit a word in the Trie - if its Wildcard Search flag is set to false then we will check if the next character is a space/punct 
-        if so - 
-        
-
-        if instead the word in the trie has its flag set to true we treat it like we would now - (except we work to find the word itself not just the prefix) 
-        - we go on and apply the check for ignore terms - we also will walk till the punct/space and store that word instead of just the prefix. 
-
-        Note - Do We Double Count Words in this case ? Like if someone entered win* and wind - do we double count wind ? 
-        if we follow the ignore terms - and just ensure that we clear the flag if we find an additional word - then we are great. 
-        JUST NEED TO GET MORE CERTAIN ON HOW IT KNOWS ITS A WORD - SEE EndWordLink .. ?
-    */
-    // actually searching the text 
-    ProcessString(text){
-        var ignoreFound = -1;
-        var storedWord = "";
-        var currentState = this.root;
-        var result = 0;
-        var wordBegin = 0;
-
-        //###### TODO find the place to mark the beginning of the word.
-        for (var j = 0; j < text.length; j++){
-            // calculating new state in trie
-            while(true){
-                var curChar = text[j].toLowerCase();
-                if (this.Trie[currentState].Children.hasOwnProperty(curChar)){
-                    // marking the begin of the word
-                    currentState = this.Trie[currentState].Children[curChar];
-                    break;
-                }else if (ignoreFound == 1){
-                    // add word and update its count
-                    var word = (this.Trie[currentState].WordID);
-                    var wordCounts = this.aboutSearch["wordCounts"];
-                    wordCounts[word] = wordCounts[word] || 0;
-                    wordCounts[word] += 1;
-                    ignoreFound = -1;
-                }
-                else{
-                    wordBegin = j;
-                }
-
-                // otherwise we will folow the suffix links, where we will either find the char
-                // or make it to the root where we can stop
-                if(currentState == this.root) break;
-                currentState = this.Trie[currentState].SuffixLink;
-            }
-            var checkState = currentState;
-
-            // finding word matches NOTE 
-            // TODO It doesnt need to be in the while loop, but change would involve restructuring all the breaks. Leaving in while loop is the easiest thing to do until we hit a stable version.
-            while(true){
-                // finding the possible word from the state
-
-                checkState = this.Trie[checkState].EndWordLink;
-                // if we make it to root we havent got a match
-                if(checkState == this.root){ break;}
-                // if we get here we have a match, we can handle it how we want to in the future
-                // since we have a match we check if the vertex has an ignore term flag 
-                if(this.Trie[checkState].IgnoreTerm == 2){
-                    // we hit the ignore term - just clear the flags and break to ignore it
-                    ignoreFound = -1;
-                    storedWord = "";
-                    break;
-                }else if (this.Trie[checkState].IgnoreTerm == 1){
-                    // we know there is a future ignore term lets set the flags, and break to avoid entering the data just yet
-                    ignoreFound = 1;
-                    storedWord = this.Trie[checkState].WordID;
-                    break;
-                }
-                let word = ""
-                if (this.Trie[checkState].WildCard == -1){
-                    // we made it here so we now check to make sure its the right word
-                    // we process the word we have found to remove all surrounding punctuation and whitespace
-                    const regex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g
-                     word = text.substr(wordBegin,(j-wordBegin)+2)
-                    word = word.replaceAll(regex, "" )
-                     word = word.trim() // can add this into the regex once I figure out how to add whitespace chars to it in a simlpe way
-
-                     if( word != this.Trie[checkState].WordID){
-                        break;
-                        }
-                        wordBegin = j+1;
-                    }else{
-                        let k = j
-                        // TODO make the while checks more robust - not punct etc
-                        while(text[k] != ' ' && text[k] != '.' && text[k] != '?'){
-                            k++;
-                        }
-                        const regex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g
-                         word = text.substr(wordBegin,(k-wordBegin)+1)
-                        word = word.replaceAll(regex, "" )
-                        word = word.trim()
-                        wordBegin = k+1;
-                    }
-
-
-                // Add it to the wordCount dictionary, more work will need to be done in the recursion if we wish to obtain seperate counts 
-                // for each folder
-                // Adds word and updates its count.
-                //var word = (this.Trie[checkState].WordID);
-                var wordCounts = this.aboutSearch["wordCounts"];
-                wordCounts[word] = wordCounts[word] || 0;
-                wordCounts[word]+= 1;
-                result ++;
-
-                break;
-            
-                // we can add a field to the leaf of vertex that denotes if it is a strict search word
-                // then check for it here and if so then we can run a check if it is a substring and ignore if so.
-                
-                // finds matched patterns of smaller length  - note we don't care for this right now. 
-                // checkState = this.Trie[checkState].SuffixLink;
-
-            }
-        }
-        return result;
-    }
-
+    destWriter.write(data).then(()=>destWriter.close());
 }
 
 // TODO Understand better and adjust to ensure this saves our file/ folder into Data. 
@@ -420,17 +90,6 @@ const saveFile = async (fileHandle,subCorp_handle) =>{
 }   
 
 
-
-const createSubCorpus = async () => {
-    const destCorpus = await winnowDir.getDirectoryHandle(subCorp_name, {create:true});
-    return destCorpus;
-}
-
-const createWinnowData = async(subCorp_handle) => {
-    const destCorpus = await subCorp_handle.getDirectoryHandle("Winnow_data", {create:true});
-    return destCorpus;
-}
-
 const checkandAddCorpus = async() => {
     const collectionsHandle = await winnowDir.getDirectoryHandle("Winnow Collections");
     const ourCollectionHandle = await collectionsHandle.getDirectoryHandle(corpus_dir.name,{create:true});
@@ -438,11 +97,16 @@ const checkandAddCorpus = async() => {
     return ourCollectionHandle;
 }
 
-const aboutWriter = async(historyFolder,data,results) => {
+const aboutWriter = async(data,results) => {
     
-    var historyFolderCopy = await checkHistory();
+    let historyFolder = await checkHistory();
     //console.log(historyFolderCopy);
-    var resultsFolder = await historyFolderCopy.getDirectoryHandle(subCorp_name, {create:true});
+    let resultsFolder = await historyFolder.getDirectoryHandle(subCorp_name, {create:true});
+
+    // writes the highlight index into the search logs
+   /* const hLfile = await resultsFolder.getFileHandle("hLIndx.txt",{create:true});
+    const hLWriter = await hLfile.createWritable();
+    await hLWriter.write(JSON.stringify(hLIndx,null,2)).then(()=> hLWriter.close());*/
 
     data["Searched Words"] = searchWords
     // write about file
@@ -458,103 +122,203 @@ const aboutWriter = async(historyFolder,data,results) => {
     return resultsFolder;
 }
 
+const bldSrchIndex = async(saveDestHandle,fileRef) =>{
+      // creating the Lunr Index Builder
 
+    let srch = new Index();
+      let results = {};
 
-
-const prepACSearch = () =>{
-    const search = new AC_search();
-
-    for (var i = 0; i < searchWords.length; i ++){
-        search.AddString(searchWords[i].toLowerCase(),searchWords[i].toLowerCase());
-    }
-    for(var i = 0; i < ignoreWords.length; i++){
-        search.AddIgnoreString(ignoreWords[i].toLowerCase(), ignoreWords[i].toLowerCase());
-    }
-    search.prepareSearch();
-   
-    return search;
-}
-
-
-const main = async () => {
-
-    // creating object that will hold a list of all files that match the search
-    var historyFolder = checkHistory();
-
-    const results = [];
-    // prepping the Aho Corasick search alg
-    var fileCount = 0;
-    const search = prepACSearch();
-
-    // creating the SubCorpus
-    const saveDestHandle = await checkandAddCorpus();
-
-    for await (const fileHandle of getFilesRecursively(corpus_dir, corpus_dir.name, [corpus_dir.name])) {
+      for await (const fileHandle of getFilesRecursively(corpus_dir, corpus_dir.name, [corpus_dir.name])) {
         // here we can feed the files to the search method. they each have the data necessary for searching and copying them into a new dir. 
-       
+       if(fileHandle.name[0] == '.' || fileHandle.name == "asearchIndx.json" || fileHandle.name == "fileRef.txt"){
+        continue;
+       }
         updateProgCount();
 
-        var file_text = await fileHandle.text();
-        //console.log("searching files"+ fileHandle.name);
+        // grabbing file
+        let file_text = await fileHandle.text();
 
-        const success = search.ProcessString(file_text);
+
+        // TODO Pass the search wrapped alg here - should return > 0 if found a match 
+        // SEARCH PARAMS  - keywords and ignore words are given via globals, pass aboutSearch, pass file_text. Expect - about search gets written to, 
+        //const success = await addToLunrIndex2(aboutSearch,fileHandle.name,file_text,hLIndx);
+        var filePath = fileHandle.pathArr
+
+         // await addToLunrIndex(indexBldr,fileHandle.name,file_text,filePath);
+         srch.add(fileHandle.name,file_text)
+         
+        // if we found a search word in the file - we save everything and add to results - no return needed from search! 
         
-        // if we found a search word in the file
-        if(success > 0){
-
-          //  console.log(fileHandle)
-          //  console.log(fileHandle.pathArr)
-            var filePath = fileHandle.pathArr
             
             // adding the file name to the results object
-            // TODO - track down the path and find a good way attaching a folder name to this - thataway we can make a heirarchy of collections later on. 
-            results.push({"fileName": fileHandle.name, "filePath" : filePath });
-            fileCount += 1;
-
+           results[fileHandle.name]=({"fileName": fileHandle.name, "filePath" : filePath });
             
             // This bit is for actually saving the files - TODO make this an optional feature later. 
-            try{
-                saveFile(fileHandle,saveDestHandle);
-                fileCount += 1;
-            }catch(err){
-                    console.log(err);
-                }
+        try{
+            await saveFile(fileHandle,saveDestHandle);
+
+        }catch(err){
+                console.log(err);
+            }
         }
-      }
-
-      // Here we add relevant search information to be added to the about file
-      // This is likely where we would haul in the meta-data as well
-
-      search.aboutSearch["Name"] = subCorp_name;
-      search.aboutSearch["Source Corpus Name"] = corpus_dir.name;
-      search.aboutSearch["Files in Corpus"] = fileCount;
       
-      // TODO  IMPLEMENT SAVING ABOUT AND RESULTS IN A HISTORY FOLDER
-      /*
-       first we need to write the code to check if there is a history folder - this should be a first run in main
-       if there is no history folder we create one 
-       
-       NOTE we will ignore the case of conflicting file names for now - THis needs to be handled somehow - adding a (1) or better - kicking it back to the user to change the name or overwrite.  
+      console.log((srch.index));
 
-       We create an entry folder for this search (maybe it should be a file but if we make it for a folder we can expand easily later) 
-      Future - we can log any fails/ errors into this folder possibly. 
 
-      Run the search
-      Add the about file into this folder
-      Add the file list into the folder
-       
-      viola. 
-      */
-      // console.log(results);
-         var resultsFolder = await aboutWriter(historyFolder,search.aboutSearch,results);
+      await srch.save(saveDestHandle,"asearchIndx.json")
 
-        // write the results to the search history 
+      // save a copy of all the file to path mappings 
+      // TODO - move this to top of collections since it is no longer search specific. 
 
-    //  console.log(search.wordCounts);
-      // return subCorp_handle
+
+      let historyFolder = await checkHistory();
+      let resultsFolder = await historyFolder.getDirectoryHandle(subCorp_name, {create:true});
+      await saveFileGeneric(JSON.stringify(results,null,2),"fileRef.txt",saveDestHandle);
+
+      fileRef = results;
+      return [srch,results]
+
+}
+
+const processResults = async(about, lunrResults) => {
+    for (let entry of lunrResults){
+        // storing an array of the indexes for word highlighting in results. 
+            hLInd[entry.ref] = entry.matchData.metadata
+
+        // WE can go grab the word and all its data by passing along the results object referencing it to get text and all like original! 
+        for (let word of Object.keys(entry.matchData.metadata)){
+            for (let words of Object.values(entry.matchData.metadata[word].body)){
+                // not ideal I think
+                for (let wordPos of words){
+                    // adds every word to our word counts - now we can grab some nice file counts too if we so choose! 
+                    let wordCounts = about["wordCounts"];
+                    wordCounts[word] = wordCounts[word] || 0;
+                    wordCounts[word] ++;
+                    //console.log(searchText.substring(wordPos[0],wordPos[0]+wordPos[1]))
+                }
+            }
+            
+        }
+    }
+}
+// TODO, determine what should be the key for hLInd
+/*const addToLunrIndex2 = async(about,fileName,searchText, hLInd)=>{
+    const index = lunr(function() {
+        this.field("title");
+        this.field("body");
+        this.metadataWhitelist =['position']
+        this.add({
+          body: searchText,
+          id: fileName,
+        });
+      });
+
+    let results = index.search("words other things lots of searches shouldnt hurt too much you know")
+      //console.log(results)
+
+      let success = 0
+
+      // should be max 1 results - this just passively handles the empty case
+    for (let entry of results){
+        // storing an array of the indexes for word highlighting in results. 
+            hLInd[fileName] = entry.matchData.metadata
+
+        for (let word of Object.keys(entry.matchData.metadata)){
+            for (let words of Object.values(entry.matchData.metadata[word].body)){
+                for (let wordPos of words){
+                    // adds every word to our word counts - now we can grab some nice file counts too if we so choose! 
+                    let word = searchText.substring(wordPos[0],wordPos[0]+wordPos[1])
+                    word = word.toLowerCase();
+                    word= word.replace(/[^a-z]+/g, " ").trim();
+                    let wordCounts = about["wordCounts"];
+                    wordCounts[word] = wordCounts[word] || 0;
+                    wordCounts[word] ++;
+                    success += 1;
+                    //console.log(searchText.substring(wordPos[0],wordPos[0]+wordPos[1]))
+                }
+            }
+            
+        }
+    }
+   // console.log(success);
+    return success;
+}*/
+// meant to take a results object (files, and thier path), an about object (with wc dict),the file result from Lunr, and a mapping obj of filenames to their paths, and their fileHandles.  
+// adds the filename and its path to results, 
+// uses the filename to lookup the handle, uses the handle to get the text, uses Lunr positions to snag words from text and to possibly highlight
+// adds those words to the word counts in about obj. Increments files found in about obj 
+
+const main = async () => {
+    // TODO - properly init results and about up front
+    // TODO - init a mapping of filenames to their paths and their handles 
+    // TODO - populate that in the for loop
+
+    // TODO decompose out the file saving into its own method above
+    // TODO run a loop over the results array and call addToResults. 
+    // TODO then save the results and about data
+
+    // creating object that will hold a list of all files that match the search
+
+    // uncertain we need this var
+    let fileCount = 0;
+    let aboutSearch = {}
+    aboutSearch["wordCounts"] = {}
+
+    // creating the SubCorpus for collections
+    const saveDestHandle = await checkandAddCorpus();
+    let historyFolder = await checkHistory();
+    let fileRefFolder = await historyFolder.getDirectoryHandle(subCorp_name, {create:true});
+
+    let srchIndx = {}
+    let fileRef = {}
+    try {
+        let index = await saveDestHandle.getFileHandle("asearchIndx.json",{create:false});
+        console.log("made it into actual search")
+        index = await index.getFile();
+        index = await index.text();
+        console.log("made it 2nd")
+        srchIndx = new Index();
+        srchIndx.load(index);
+        console.log("stopped on load ?")
+        let fileRef1 = await saveDestHandle.getFileHandle("fileRef.txt")
+        let fileRef2 = await fileRef1.getFile()
+        let fileRef3 = await fileRef2.text()
+        fileRef = JSON.parse(fileRef3)
+        console.log("finished !! ")
+    }catch(err){
+        console.log(err)
+        console.log("couldn't find index, proceeding to build one")
+        let answerArr = await bldSrchIndex(saveDestHandle);
+        srchIndx = answerArr[0]
+        fileRef = answerArr[1]
+    }
+    console.log(fileRef);
+    let results = srchIndx.searchTxt(searchWords);
+
+    let resultsFull = []
+    for (let res of results){
+        resultsFull.push(fileRef[res])
+    }
+    // if succesfull lets send something off to process the results. 
+
+   // let lunrResults = lunrIndx.search("words other things lots of searches shouldnt hurt too much you know")
+    // let hLIndx =   processResults(aboutSearch,lunrResults)
+      aboutSearch["Name"] = subCorp_name;
+      aboutSearch["Source Corpus Name"] = corpus_dir.name;
+      aboutSearch["Files in Corpus"] = resultsFull.length;
+
+   let  hLIndx = {}
+      let resultsFolder = await aboutWriter(aboutSearch,resultsFull);
+      // save the highlight index to the corpus...
+
       return resultsFolder
     }
       
 
 return main();
 }
+
+
+// 11/13 - okay I think the search.jsx is fully working for our features. Just need to test if it returns the dictionary properly on search with indexes
+// Now just to clean up this page - streamline the searching pipeline -i.e ensure that the tokens are being passed in properly that it saves results properly and all. 
+// make sure to add in data on word counts - etc. 
