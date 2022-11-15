@@ -129,7 +129,7 @@ export default function SearchForm({fromLanding}) {
             groupWords = wordGroups[selected_Group.current.value];
         }
         const includeTokens = keywordParse(raw_include.current.value +"," + groupWords);
-        const excludeTokens = keywordParse(raw_exclude.current.value);
+        //const excludeTokens = keywordParse(raw_exclude.current.value);
 
         // begin loading
         setLoading(true);
@@ -137,7 +137,7 @@ export default function SearchForm({fromLanding}) {
         
         // TODO pass prop containing the metaData file. 
        // send off to do the search, then set the created results directory in the global state
-        await search(corpus,includeTokens,subCorp_name.current.value,winnowDir, updateProgCount, excludeTokens).then((recentRunDir) => {
+        await search(corpus,includeTokens,subCorp_name.current.value,winnowDir, updateProgCount).then((recentRunDir) => {
             if (!recentRunDir){
                 alert("There was an error in searching, please try again or contact a developer");
             }
@@ -257,11 +257,11 @@ export default function SearchForm({fromLanding}) {
                             <select id = "groupSelect" ref = {selected_Group}>
                             </select>
 
-                            <input
+                           {/* <input
                                 className={`form-input${fromLanding}`}
                                 ref={raw_exclude}
                                 placeholder="Exclude Terms">
-                            </input>
+                            </input>*/}
                           
                             {/* submission button, uses onClick event to upload to server */}
                             <button type="submit" id="submit-btn" className={`submitButton${fromLanding}`}>

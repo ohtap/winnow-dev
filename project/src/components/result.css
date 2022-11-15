@@ -67,8 +67,8 @@
 
 .fileList {
   margin: 30px;
-  max-width: 50%;
-  min-width: 30%;
+  width: 30%;
+  min-width: 200px;
   max-height: 325px;
   overflow: auto;
 }
@@ -85,8 +85,7 @@
 }
 
 .fileButton{
-
-  background-color: blanchedalmond;
+  background-color: white;
   border: none;
 }
 

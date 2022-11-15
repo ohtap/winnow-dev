@@ -19,7 +19,7 @@
 import Index from "./fullTextSearch"
 //TODO - add a "files searched" field to be generated while searching and added into about.txt
 // TODO consider just creating an object with all this info and passing that, as the params are starting to get lengthy
-export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount, ignoreWords){
+export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount){
   
     // adapted from the recursive scan function provided in the mozilla documentation https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle
     async function* getFilesRecursively (entry, pathname, path) {
