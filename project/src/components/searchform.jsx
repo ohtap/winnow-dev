@@ -247,6 +247,7 @@ export default function SearchForm({fromLanding}) {
                                      
                              </input>
                             {/* <p> Use the * symbol at the end of a term to search for any word with that prefix. (i.e fly* will find "fly","flying","flyers"... )</p>*/}
+                            <p> Note: Single search term support only, searching is done with a stemmer i.e "fly" will result in both "fly" and "flying"</p>
                             <input
                                 className={`form-input${fromLanding}`}
                                 ref={raw_include}

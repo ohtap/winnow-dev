@@ -31,14 +31,88 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
   let [fileViewed,setFileViewed] =useState();
   let [curMark, setCurMark] = useState(0);
 
-  // /TODO: fix the multiple page run issue.
+
   //runs the main function, prevents multiple reruns of main
   useEffect( () => {
     main();
   },[recentRunDir])
 
+  //TODO - move into utility file as this is used across several files. 
+  async function* getFilesRecursively (entry, pathname, path) {
+    if (entry.kind === 'file') {
+      const file = await entry.getFile();
+      if (file !== null) {
+        file.relativePath = pathname;
+        file.pathArr = path;
+        yield file;
+      }
+    } else if (entry.kind === 'directory') {
+      for await (const handle of entry.values()) {
+        let temp_path =  []
+        for (let f of path){
+            temp_path.push(f)
+        }
+        temp_path.push(handle.name)
+        yield* getFilesRecursively(handle,([pathname] + `/${handle.name}`),temp_path);
+      }
+    }
+  }
 
 
+
+  const fileFromList = async(fileName) =>{
+    let filePath = fileList[fileName];
+    //console.log(filePath);
+
+    // looping through the path to construct the proper fileHandle
+    let dirHandle = await winnowDir.getDirectoryHandle("Winnow Collections")
+    for (let i = 0; i < filePath.length -1; i++){
+      dirHandle = await dirHandle.getDirectoryHandle(filePath[i]);
+    }
+    let fileHandle = await dirHandle.getFileHandle(filePath[filePath.length - 1]);
+    return fileHandle
+  }
+
+  // Saves files, files handles MUST have a relative path property appended to them.- TODO move into a utility file as its used across several files. 
+  const saveFile = async (fileHandle,subCorp_handle) =>{
+    let destHandle = subCorp_handle;
+    const paths = [];
+   // console.log(subCorp_handle);
+
+    // splitting to get each folder along the path 
+    let filePath = fileHandle.relativePath
+    for ( var path of filePath){
+        paths.push(path);
+    }
+    // TODO once we remove filename from relative path we dont need to push to array, can process after split
+
+    // jumping through the file path and creating the folders if need be as we go
+    for ( var i = 1; i < (paths.length -1); i++){
+        destHandle = await destHandle.getDirectoryHandle(paths[i], {create:true});
+    }
+
+    var destFileHandle = await destHandle.getFileHandle(fileHandle.name, {create: true});
+
+    // CONSIDER pasing this in to avoid the extra work. 
+    fileHandle = await fileHandle.getFile()
+    const text = await fileHandle.text();
+
+    const destWriter = await destFileHandle.createWritable();
+    destWriter.write(text).then(() => destWriter.close());
+} 
+
+// write the thing that snags the filehanlde from file path - see function below for this. 
+const saveResults = async(event)=>{
+  event.preventDefault();
+  let destHandle = await showDirectoryPicker();
+  if (destHandle) {
+    for (let fileName of Object.keys(fileList)){
+      let fileHandle = await fileFromList(fileName);
+      fileHandle.relativePath = fileList[fileName]
+      await saveFile(fileHandle,destHandle);
+    }
+  }
+} 
   const getHighlightData = async(fileName,fileText) => {
     const aboutFileHandle = await recentRunDir.getFileHandle("about.txt");
     var aboutFile = await aboutFileHandle.getFile();
@@ -109,11 +183,11 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
    
   }
 
-  const fileToReader = async(event) => {
-    event.preventDefault();
-    // snagging the path from the state
-    let fileName = event.target.id;
-    setFileViewed(fileName)
+  // create a function that takes the relative path and returns a file handle from that path with the relative path stored in the file handle - use this
+  // in our save files to snag each file from the file list then save it accordingly in the directory of our choosing
+
+  // this is the important bit
+/*
     let filePath = fileList[fileName];
     console.log(filePath);
 
@@ -123,6 +197,15 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
       dirHandle = await dirHandle.getDirectoryHandle(filePath[i]);
     }
     let fileHandle = await dirHandle.getFileHandle(filePath[filePath.length - 1]);
+
+
+*/
+  const fileToReader = async(event) => {
+    event.preventDefault();
+    // snagging the path from the state
+    let fileName = event.target.id;
+    setFileViewed(fileName)
+    let fileHandle = await fileFromList(fileName);
     
     const file = await fileHandle.getFile();
     const fileText = await file.text();
@@ -313,6 +396,7 @@ let {dispatch,recentRunDir, winnowDir} = useContext(AuthContext);
   </div>
  
   <div>
+          <button onClick = {saveResults}> Save Results</button>
           <button onClick={deleteResults}>Delete Results</button>
         </div>
     </div>

@@ -123,6 +123,15 @@ return (
                 submit
             </button>
         </form>
+        <br></br>
+        <p> About Winnow: Winnow is designed to be a text search tool for researchers. Rather than giving you the most popular five items that match your search, we aim to give you a comprehensive and accurate account of all the articles that match your search.</p>
+    <p>How to use Winnow? </p>
+        <p> Winnow currently has several features, once you enter a working directory you can simply conduct a new search on the "New Search" page.
+        If you have a large list of search terms you would like to store you can create a set of terms to search by in the "Search Term Library".
+        To view a history of searches visit the "Search History" tab and if you wish to view the results of one of those searches you can click on the entry to take you to the results page.
+        While on the results page you can choose to save a copy of all the files to your folder of choice by clicking "save results" at the bottom of the page, or if you do not like those results you can click "delete results" to remove them from your search history.
+        Remember, it is important to select the winnow directory you used previously as all your winnow data is saved here</p>
     </div>
+    
 </div>);
 };

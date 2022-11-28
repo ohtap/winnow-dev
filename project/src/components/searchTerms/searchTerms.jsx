@@ -122,7 +122,7 @@ useEffect(
   return (
     <div>
       <button onClick= {createNew}>Create New</button>
-      <textarea id = "newTitle" placeholder="New Group Name" onChange={(event) => setNewTitle(event.target.value)}> </textarea>
+      <textarea id = "newTitle" placeholder="New Group Name" onChange={(event) => setNewTitle(event.target.value)}></textarea>
       {
         
         wordGroups.map((group, idx) => {
