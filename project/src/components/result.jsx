@@ -130,6 +130,7 @@ const saveResults = async(event)=>{
 
     let newFileText = fileText
     let entries = {};
+    console.log(result[fileName])
     try{
      entries = result[fileName].sort(function(a,b){
       if (a["start"] > b["start"]){

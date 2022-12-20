@@ -154,7 +154,16 @@ export default class Index {
     // TODO - write up support for indexedWords  - likely push this off to a private function that handles it bc everyhting is different
     console.log(tokens)
     console.log(this._index)
-
+    
+    console.log(this._index[tokens[0]])
+    
+   let  cleanedTokens = new Set()
+    for (let word of tokens){
+        word = word.replace(/[,."!?@#$%&]+/g, "").trim();
+        word = this.stemmer(word.toLowerCase());
+        cleanedTokens.add(word)
+    }
+    tokens = cleanedTokens
     let results = new Set();
     for (let token of tokens){
         if (this._index[token] != undefined && this._index[token] != -1){
@@ -169,8 +178,15 @@ export default class Index {
     searchTxtIndex(tokens){
         console.log(tokens)
         console.log(this._index)
+        let  cleanedTokens = new Set()
+        for (let word of tokens){
+            word = word.replace(/[,."!?@#$%&]+/g, "").trim();
+            word = this.stemmer(word.toLowerCase());
+            cleanedTokens.add(word)
+        }
+
     let results = {};
-    for (let token of tokens){
+    for (let token of cleanedTokens){
         if (this._index[token] != undefined && this._index[token] != -1){
             console.log("used ", token, "and found something at least")
             console.log(Object.keys(this._index[token]))

@@ -63,6 +63,7 @@ export default function SearchForm({fromLanding}) {
 
         let wordGroupsFile = await wordGroupsHandle.getFile()
         wordGroupsFile = await wordGroupsFile.text()
+
         const wordGroupsdata = await JSON.parse(wordGroupsFile)
 
 
@@ -125,7 +126,7 @@ export default function SearchForm({fromLanding}) {
     const runSearch = async() => {
 
         let groupWords = ""
-        if (selected_Group.current.value != " "){
+        if (selected_Group.current.value != ' ' && selected_Group.current.value != ''){
             groupWords = wordGroups[selected_Group.current.value];
         }
         const includeTokens = keywordParse(raw_include.current.value +"," + groupWords);
