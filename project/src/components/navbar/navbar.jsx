@@ -28,7 +28,7 @@ function NavBar() {
             {/* navigation links div */}
            { winnowDir ? <div className="d-flex w-50 fs-3 pb-2 justify-content-center">
                 <Link to="/" className="text-decoration-none px-4">Home</Link>
-                <Link to="/search" className="text-decoration-none px-4">New Search</Link>
+                <Link to="/search" className="text-decoration-none px-4">New 2.0 Search</Link>
                 <Link to="/terms" className="text-decoration-none px-4">Search-Term Library</Link>
                 <Link to="/history" className="text-decoration-none px-4">Search History</Link>
                 
