@@ -32,6 +32,26 @@ a:hover {
     border-radius: 48px;
 }
 
+.navlink {
+    color: #58585B;
+    border: none;
+    background-color: transparent;
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+.navBar {
+    display: flex;
+    align-content: flex-start;
+    font-family: sans-serif;
+    background-color: #F8F9FA;
+    font-size: medium;
+}
+
+.navlink:hover {
+    color: black;
+}
+
 ul {
     list-style-type: none;
-  }
+}

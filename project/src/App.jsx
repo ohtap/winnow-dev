@@ -1,7 +1,5 @@
 
 
-
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'; // React Router, for Page Navigation and Loading
 import './App.css';
 
 // import components
@@ -11,29 +9,39 @@ import DisplayResult from './components/result';
 import SearchForm from './components/searchform';
 import SearchHistory from './components/history/history';
 import SearchTerms from './components/searchTerms/searchTerms';
-function App() {
+import { useContext, useState, useEffect } from "react";
 
-  console.log("routing in app");
+export const Pages = {
+  Landing: Symbol("landing"),
+  SearchTerms: Symbol("search terms"),
+  Search: Symbol("search"),
+  Results: Symbol("results"),
+  History: Symbol("history")
+}
+
+function App() {
+  // Enum for which page we are on
+  let [page, setPage] = useState(Pages.Landing);
 
   return (
-    
-    <Router>
     <div className="mw-100 vh-100">
-      <NavBar />
+      <NavBar pageSet={(arg) => setPage(arg)} />
       <div className="h-75">
-        <Routes>
-          <Route exact path="/" element = {<Landing/>}/>
-          <Route path = "/terms" element = {<SearchTerms/>}/>
-          <Route path = "/search" element = {<SearchForm fromLanding={1} />}/>
-          <Route path = "/results" element = {<DisplayResult/>}/>
-          <Route path = "/history" element = {<SearchHistory/>}/>
-          {/* add error component here */}
-        </Routes>
-        
+        {page === undefined && console.error("404 page not found")}
+
+        {(page !== undefined && page === Pages.Landing) && <Landing pageSet={setPage} ></Landing>}
+
+        {(page !== undefined && page === Pages.Search) && <SearchForm fromLanding={1} pageSet={setPage} />}
+
+        {(page !== undefined && page === Pages.History) && <SearchHistory pageSet={setPage} />}
+
+        {(page !== undefined && page === Pages.SearchTerms) && <SearchTerms pageSet={setPage} />}
+
+        {(page !== undefined && page === Pages.Results) && <DisplayResult pageSet={setPage} />}
+
       </div>
     </div>
-  </Router>
-    
-  )};
+  )
+};
 
 export default App
