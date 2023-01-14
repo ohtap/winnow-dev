@@ -38,7 +38,7 @@ function NavBar(props) {
                 <button className="navlink" onClick={(event) => {
                     event.preventDefault;
                     pageSet(Pages.Search)
-                }}>New 2.0 Search</button>
+                }}>New Search</button>
                 <button className="navlink" onClick={(event) => {
                     event.preventDefault;
                     pageSet(Pages.SearchTerms)

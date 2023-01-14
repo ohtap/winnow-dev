@@ -27,7 +27,7 @@ export default function SearchForm(props) {
     // used to render how many files have been searched
     let [progress, setProgress] = useState(0);
     // keyWord groups
-    let [wordGroups, setWordGroups] = useState();
+    let [wordGroups, setWordGroups] = useState([]);
 
     const [metaFile, setMetaFile] = useState();
 
@@ -55,21 +55,11 @@ export default function SearchForm(props) {
 
         let wordGroupsFile = await wordGroupsHandle.getFile()
         wordGroupsFile = await wordGroupsFile.text()
-
         const wordGroupsdata = await JSON.parse(wordGroupsFile)
 
-        setWordGroups(wordGroupsdata)
-        let select = document.getElementById("groupSelect");
-
-        let groupKeys = Object.keys(wordGroupsdata)
-        groupKeys.unshift(" ")
-        for (let i = 0; i < groupKeys.length; i++) {
-            let opt = groupKeys[i];
-            let el = document.createElement("option");
-            el.textContent = opt;
-            el.value = opt;
-            select.appendChild(el);
-        }
+        let groupKeys = Object.keys(wordGroupsdata) // we map these to their options in return
+        groupKeys.unshift(''); // adds the default selection as empty. 
+        setWordGroups(groupKeys)
     }
 
     const updateProgCount = () => {
@@ -106,7 +96,7 @@ export default function SearchForm(props) {
             runSearch().then(() => {
                 console.log("navigating")
                 setLoading(false);
-                pageSet(Pages.Results)
+                //pageSet(Pages.Results)
             });
         } else {
             alert("please select a corpus");
@@ -203,7 +193,7 @@ export default function SearchForm(props) {
                                 placeholder="Results Name">
 
                             </input>
-                            <p> Note: Single search term support only, searching is done with a stemmer i.e "fly" will result in both "fly" and "flying"</p>
+                           {/* <p> Note: Single search term support only, searching is done with a stemmer i.e "fly" will result in both "fly" and "flying"</p>*/}
                             <input
                                 className={`form-input${fromLanding}`}
                                 ref={raw_include}
@@ -212,6 +202,10 @@ export default function SearchForm(props) {
 
                             <label> Search Group:</label>
                             <select id="groupSelect" ref={selected_Group}>
+                                {wordGroups.map(group => 
+                                    <option value = {group}>{group}</option>)
+                                
+                                }
                             </select>
 
                             {/* submission button, uses onClick event to upload to server */}

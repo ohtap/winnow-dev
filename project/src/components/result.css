@@ -120,3 +120,12 @@ mark {
 .scrollBtn {
   width: 150px;
 }
+
+.downloadButton {
+background-color: green;
+}
+
+.deleteButton {
+background-color: rgba(179, 32, 32, 0.967);
+float: right;
+}

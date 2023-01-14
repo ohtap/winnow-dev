@@ -19,9 +19,11 @@ export default function DisplayResult(props) {
   let [viewerContent, setViewerContent] = useState()
   let [fileList, setFileList] = useState({})
   let [keyWords, setKeyWords] = useState([])
+  let [resultsRaw, setResultsRaw] = useState([])
   let [marks, setMarks] = useState([])
   let [fileViewed, setFileViewed] = useState();
   let [curMark, setCurMark] = useState(0);
+
 
   //runs the main function, prevents multiple reruns of main
   useEffect(() => {
@@ -199,27 +201,7 @@ export default function DisplayResult(props) {
     const resultsContent = await resultsFile.text();
     const resultsData = JSON.parse(resultsContent);
 
-    // TDOO  move this to a better place
-    let files = document.getElementById("fileList");
-
-    // TODO FIGURE OUT WHY: every time I add a button it doesnt do anything when clicked - even when I harcode it as html. - otherwise we will be stuck bc we cannot nest forms. 
-    // TO DO add folder heirarchies - look at the file path, parse it and keep grabbing entries within it. 
-    for (let i = 0; i < resultsData.length; i++) {
-      let fileName = resultsData[i].fileName;
-      let filePath = resultsData[i].filePath
-
-      fileList[fileName] = filePath;
-      let file = document.createElement('button');
-      file.innerText = fileName
-      file.className = "fileButton"
-      let fileForm = document.createElement('form')
-      fileForm.id = fileName
-      fileForm.onsubmit = fileToReader
-      fileForm.appendChild(file);
-      files.appendChild(fileForm);
-    }
-
-    console.log("finished get about data")
+    setResultsRaw(Object.values(resultsData));
 
     return aboutData
   }
@@ -250,7 +232,7 @@ export default function DisplayResult(props) {
     const div = document.getElementById("wordContent");
 
     // removing any existing table on reloads.
-    while (div.firstChild) {
+    while (div.firstChild !== null) {
       div.removeChild(div.firstChild);
     }
 
@@ -299,9 +281,14 @@ export default function DisplayResult(props) {
   }
 
   const main = async () => {
+    console.log("running results");
+    let previousFiles = document.getElementById('fileList');
+    previousFiles.textContent = '';
+    // maybe I need to clear everything bc we are no longer refreshing. 
     const about_data = await getAboutData();
     displayAbout(about_data);
-    createKeyWordTable(about_data["wordCounts"]);
+    // ADD back in once keyword counts is enabled
+    //createKeyWordTable(about_data["wordCounts"]);
 
   }
 
@@ -328,6 +315,12 @@ export default function DisplayResult(props) {
 
       <div className="files">
         <div id="fileList" className="fileList">
+          {resultsRaw.map(result =>   
+          // TODO - restructure how we deal with results so we don't need to dont need fileList at all.                 
+            ((fileList[result.fileName] = result.filePath) && <form id = {result.fileName} onSubmit = {fileToReader}>
+            <button className = "fileButton"  >{result.fileName}</button>
+            </form>
+          ))}
         </div>
         <div>
           <div id="scrollMarks">
@@ -344,8 +337,8 @@ export default function DisplayResult(props) {
       </div>
 
       <div>
-        <button onClick={saveResults}> Save Results</button>
-        <button onClick={deleteResults}>Delete Results</button>
+        <button className = "downloadButton" onClick={saveResults}> Download Results</button>
+        <button className = "deleteButton" onClick={deleteResults}>Delete Results</button>
       </div>
     </div>
 
