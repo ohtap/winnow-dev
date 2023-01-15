@@ -289,8 +289,8 @@ export default function DisplayResult(props) {
 
   const main = async () => {
     console.log("running results");
-    let previousFiles = document.getElementById('fileList');
-    previousFiles.textContent = '';
+  //  let previousFiles = document.getElementById('fileList');
+   // previousFiles.textContent = '';
     // maybe I need to clear everything bc we are no longer refreshing. 
     const about_data = await getAboutData();
     console.log("finishing get about data");
@@ -320,14 +320,14 @@ export default function DisplayResult(props) {
           </div>
         </div>
 
-  </div>*/}``
+  </div>*/}
 
       <div className="files">
         <div id="fileList" className="fileList">
           { resultsRaw.map(result => (
           // TODO - restructure how we deal with results so we don't need to dont need fileList at all.       
-          // <button className = "fileButton" onClick = {() => fileToReader(result)}>{result.fileName}</button>          
-            <div key = {result.fileName}>hi</div>
+          //           
+            <div key = {result.fileName}><button className = "fileButton" onClick = {() => fileToReader(result)}>{result.fileName}</button></div>
             ))}
         </div>
         <div>
