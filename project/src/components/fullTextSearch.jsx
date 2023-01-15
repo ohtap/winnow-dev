@@ -121,8 +121,6 @@ export default class Index {
 
         // TODO - write up support for indexedWords  - likely push this off to a private function that handles it bc everyhting is different
         console.log(tokens)
-        console.log(this._index)
-
         console.log(this._index[tokens[0]])
 
         let cleanedTokens = new Set()

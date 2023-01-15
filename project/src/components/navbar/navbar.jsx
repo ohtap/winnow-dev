@@ -11,8 +11,6 @@ import "../../App.css";  // import App-wide style sheet
 import { Pages } from "../../App";
 function NavBar(props) {
     const { pageSet } = props
-
-    console.log("setting page")
     //pageSet("fiver");
     const { winnowDir } = useContext(AuthContext);
 

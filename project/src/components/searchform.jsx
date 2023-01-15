@@ -27,7 +27,7 @@ export default function SearchForm(props) {
     // used to render how many files have been searched
     let [progress, setProgress] = useState(0);
     // keyWord groups
-    let [wordGroups, setWordGroups] = useState([]);
+    let [wordGroups, setWordGroups] = useState({});
 
     const [metaFile, setMetaFile] = useState();
 
@@ -57,9 +57,9 @@ export default function SearchForm(props) {
         wordGroupsFile = await wordGroupsFile.text()
         const wordGroupsdata = await JSON.parse(wordGroupsFile)
 
-        let groupKeys = Object.keys(wordGroupsdata) // we map these to their options in return
-        groupKeys.unshift(''); // adds the default selection as empty. 
-        setWordGroups(groupKeys)
+       // let groupKeys = Object.entries(wordGroupsdata) // we map these to their options in return
+     //   groupKeys.unshift(''); // adds the default selection as empty. 
+        setWordGroups(wordGroupsdata);
     }
 
     const updateProgCount = () => {
@@ -96,7 +96,7 @@ export default function SearchForm(props) {
             runSearch().then(() => {
                 console.log("navigating")
                 setLoading(false);
-                //pageSet(Pages.Results)
+                pageSet(Pages.Results)
             });
         } else {
             alert("please select a corpus");
@@ -110,6 +110,9 @@ export default function SearchForm(props) {
         if (selected_Group.current.value != ' ' && selected_Group.current.value != '') {
             groupWords = wordGroups[selected_Group.current.value];
         }
+        console.log(wordGroups);
+        console.log(selected_Group.current.value);
+        console.log(groupWords);
         const includeTokens = keywordParse(raw_include.current.value + "," + groupWords);
         //const excludeTokens = keywordParse(raw_exclude.current.value);
 
@@ -202,9 +205,10 @@ export default function SearchForm(props) {
 
                             <label> Search Group:</label>
                             <select id="groupSelect" ref={selected_Group}>
-                                {wordGroups.map(group => 
+                                <option></option>
+                                {
+                                Object.keys(wordGroups).map(group => 
                                     <option value = {group}>{group}</option>)
-                                
                                 }
                             </select>
 

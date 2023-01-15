@@ -115,9 +115,7 @@ export default function DisplayResult(props) {
     let srch = new Index(true);
     srch.add(fileName, fileText);
 
-    let result = srch.searchTxtIndex(searchWords) // assuming the keyWords actually works which would be nice
-
-    console.log(result)
+    let result = srch.searchTxtIndex(searchWords)
 
     let newFileText = fileText
     let entries = {};
@@ -172,10 +170,12 @@ export default function DisplayResult(props) {
 
   }
 
-  const fileToReader = async (event) => {
-    event.preventDefault();
+  const fileToReader = async (result) => {
+   // event.preventDefault();
+    console.log("in fileToReader");
     // snagging the path from the state
-    let fileName = event.target.id;
+    console.log(result)
+    let fileName = result.fileName;
     setFileViewed(fileName)
     let fileHandle = await fileFromList(fileName);
 
@@ -202,6 +202,13 @@ export default function DisplayResult(props) {
     const resultsData = JSON.parse(resultsContent);
 
     setResultsRaw(Object.values(resultsData));
+
+    let tempResults = [];
+    for (let result of Object.values(resultsData)){
+      tempResults[result.fileName] = result.filePath;
+    }
+
+    setFileList(tempResults);
 
     return aboutData
   }
@@ -232,9 +239,9 @@ export default function DisplayResult(props) {
     const div = document.getElementById("wordContent");
 
     // removing any existing table on reloads.
-    while (div.firstChild !== null) {
-      div.removeChild(div.firstChild);
-    }
+   // while (div.firstChild !== null) {
+    //  div.removeChild(div.firstChild);
+    //}
 
     const tbl = document.createElement('table');
     // adding style
@@ -286,7 +293,9 @@ export default function DisplayResult(props) {
     previousFiles.textContent = '';
     // maybe I need to clear everything bc we are no longer refreshing. 
     const about_data = await getAboutData();
+    console.log("finishing get about data");
     displayAbout(about_data);
+    console.log("finished display about");
     // ADD back in once keyword counts is enabled
     //createKeyWordTable(about_data["wordCounts"]);
 
@@ -311,16 +320,15 @@ export default function DisplayResult(props) {
           </div>
         </div>
 
-  </div>*/}
+  </div>*/}``
 
       <div className="files">
         <div id="fileList" className="fileList">
-          {resultsRaw.map(result =>   
-          // TODO - restructure how we deal with results so we don't need to dont need fileList at all.                 
-            ((fileList[result.fileName] = result.filePath) && <form id = {result.fileName} onSubmit = {fileToReader}>
-            <button className = "fileButton"  >{result.fileName}</button>
-            </form>
-          ))}
+          { resultsRaw.map(result => (
+          // TODO - restructure how we deal with results so we don't need to dont need fileList at all.       
+          // <button className = "fileButton" onClick = {() => fileToReader(result)}>{result.fileName}</button>          
+            <div key = {result.fileName}>hi</div>
+            ))}
         </div>
         <div>
           <div id="scrollMarks">

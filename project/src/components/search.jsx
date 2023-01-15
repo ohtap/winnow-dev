@@ -191,7 +191,6 @@ export default async function search(corpus_dir, searchWords, subCorp_name, winn
             console.log("made it 2nd")
             srchIndx = new Index();
             srchIndx.load(index);
-            console.log("stopped on load ?")
             let fileRef1 = await saveDestHandle.getFileHandle("fileRef.txt")
             let fileRef2 = await fileRef1.getFile()
             let fileRef3 = await fileRef2.text()

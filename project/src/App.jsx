@@ -22,7 +22,7 @@ export const Pages = {
 function App() {
   // Enum for which page we are on
   let [page, setPage] = useState(Pages.Landing);
-
+  console.log(page);
   return (
     <div className="mw-100 vh-100">
       <NavBar pageSet={(arg) => setPage(arg)} />
