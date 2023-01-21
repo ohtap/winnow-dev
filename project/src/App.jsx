@@ -8,6 +8,7 @@ import Landing from './components/landing';
 import DisplayResult from './components/result';
 import SearchForm from './components/searchform';
 import SearchHistory from './components/history/history';
+import Info from './components/info';
 import SearchTerms from './components/searchTerms/searchTerms';
 import { useContext, useState, useEffect } from "react";
 
@@ -16,7 +17,8 @@ export const Pages = {
   SearchTerms: Symbol("search terms"),
   Search: Symbol("search"),
   Results: Symbol("results"),
-  History: Symbol("history")
+  History: Symbol("history"),
+  Info: Symbol("info")
 }
 
 function App() {
@@ -38,6 +40,8 @@ function App() {
         {(page !== undefined && page === Pages.SearchTerms) && <SearchTerms pageSet={setPage} />}
 
         {(page !== undefined && page === Pages.Results) && <DisplayResult pageSet={setPage} />}
+
+        {(page !== undefined && page === Pages.Info) && <Info/>}
 
       </div>
     </div>

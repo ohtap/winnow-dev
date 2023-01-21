@@ -220,7 +220,7 @@ export default function DisplayResult(props) {
     let text = "";
 
     for (let key of Object.keys(aboutData)) {
-      if (key === "wordCounts") {
+      if (key === "wordCounts" || key === "date") {
         //do nothing 
       } else {
         text += `${key}: ${aboutData[key]}    `;

@@ -28,13 +28,13 @@ export default function SearchForm(props) {
     let [progress, setProgress] = useState(0);
     // keyWord groups
     let [wordGroups, setWordGroups] = useState({});
-
+    // all the folder names in logged searches
+    let [prevSearches,setprevSearches] = useState([]);
     const [metaFile, setMetaFile] = useState();
 
     useEffect(() => {
         snagWordGroups();
-        console.log("snagging some stufff")
-
+        snagPrevSearches();
         if (!winnowDir) {
             pageSet(Pages.Landing);
         }
@@ -42,7 +42,6 @@ export default function SearchForm(props) {
 
     // saving state variables
     const raw_include = useRef();
-    const raw_exclude = useRef();
     const subCorp_name = useRef();
     const selected_Group = useRef();
 
@@ -57,9 +56,18 @@ export default function SearchForm(props) {
         wordGroupsFile = await wordGroupsFile.text()
         const wordGroupsdata = await JSON.parse(wordGroupsFile)
 
-       // let groupKeys = Object.entries(wordGroupsdata) // we map these to their options in return
-     //   groupKeys.unshift(''); // adds the default selection as empty. 
         setWordGroups(wordGroupsdata);
+    }
+
+    const snagPrevSearches = async() => {
+        const logs = await winnowDir.getDirectoryHandle("Search Logs");
+        const test2 = await winnowDir.getFileHandle("test.txt");
+        const tempSearches = [];
+        const searches = await winnowDir.getDirectoryHandle("Search Logs")
+        for await (const entry of searches.values()) {
+            tempSearches.push(entry.name);
+          }
+        setprevSearches(tempSearches);
     }
 
     const updateProgCount = () => {
@@ -89,17 +97,19 @@ export default function SearchForm(props) {
 
         // prevents page refresh
         event.preventDefault();
-
-        // checks if corpus has been selected then runs search then navigates to the results pag
-        if (corpus) {
+        // error checking
+        if (!corpus){
+            alert("please select a corpus");
+        }else if(prevSearches.includes(subCorp_name.current.value)){
+            alert("Results name already used, rename search to continue");
+        }
+        else {
             console.log("Navigating to results");
             runSearch().then(() => {
                 console.log("navigating")
                 setLoading(false);
                 pageSet(Pages.Results)
             });
-        } else {
-            alert("please select a corpus");
         }
     };
 
@@ -110,19 +120,17 @@ export default function SearchForm(props) {
         if (selected_Group.current.value != ' ' && selected_Group.current.value != '') {
             groupWords = wordGroups[selected_Group.current.value];
         }
-        console.log(wordGroups);
-        console.log(selected_Group.current.value);
-        console.log(groupWords);
+
         const includeTokens = keywordParse(raw_include.current.value + "," + groupWords);
         //const excludeTokens = keywordParse(raw_exclude.current.value);
 
         // begin loading
         setLoading(true);
 
-
+        const date = new Date();
         // TODO pass prop containing the metaData file. 
         // send off to do the search, then set the created results directory in the global state
-        await search(corpus, includeTokens, subCorp_name.current.value, winnowDir, updateProgCount).then((recentRunDir) => {
+        await search(corpus, includeTokens, subCorp_name.current.value, winnowDir, updateProgCount,date).then((recentRunDir) => {
             if (!recentRunDir) {
                 alert("There was an error in searching, please try again or contact a developer");
             }
@@ -196,14 +204,15 @@ export default function SearchForm(props) {
                                 placeholder="Results Name">
 
                             </input>
-                           {/* <p> Note: Single search term support only, searching is done with a stemmer i.e "fly" will result in both "fly" and "flying"</p>*/}
+                            <p> Enter search terms seperated by a comma. Single terms only, no phrases </p>
                             <input
                                 className={`form-input${fromLanding}`}
                                 ref={raw_include}
                                 placeholder="Search Terms">
                             </input>
 
-                            <label> Search Group:</label>
+                            <div>
+                            <label> Saved Search Terms:</label>
                             <select id="groupSelect" ref={selected_Group}>
                                 <option></option>
                                 {
@@ -211,6 +220,7 @@ export default function SearchForm(props) {
                                     <option value = {group}>{group}</option>)
                                 }
                             </select>
+                            </div>
 
                             {/* submission button, uses onClick event to upload to server */}
                             <button type="submit" id="submit-btn" className={`submitButton${fromLanding}`}>

@@ -30,9 +30,25 @@ export default function SearchHistory(props) {
     let historyFolder = await winnowDir.getDirectoryHandle("Search Logs");
     for await (const [key, value] of historyFolder.entries()) {
       if (value.kind != "file") {
+        // snagging date and tacking that on to sort by
+        const dataFile = await value.getFileHandle("about.txt");
+        const data = await dataFile.getFile();
+        const dataText = await data.text();
+        const dataObj = await JSON.parse(dataText);
+
+        if (dataObj.date){
+          value.date = dataObj.date;
+        }else {
+          // if it doesn't have a date we append a really old date. (makes it retro active)
+          value.date = new Date("2020-12-17T03:24:00");
+        }
         entryCont.push(value);
       }
+
     }
+
+    entryCont.sort(function(a,b){ 
+      return new Date(b.date) - new Date(a.date);})
     setEntries(entryCont);
     console.log("succesfully set entries");
   }
@@ -47,8 +63,7 @@ export default function SearchHistory(props) {
 
     <div>
       {
-
-        entries.map((entry) => (
+             entries.map((entry) => (
           <SearchEntry key={entry.name} data={entry} pageSet={pageSet} />
         ))
       }

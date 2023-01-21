@@ -12,7 +12,7 @@
  */
 
 import Index from "./fullTextSearch"
-export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount) {
+export default async function search(corpus_dir, searchWords, subCorp_name, winnowDir, updateProgCount,date) {
 
     // adapted from the recursive scan function provided in the mozilla documentation https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle
     async function* getFilesRecursively(entry, pathname, path) {
@@ -88,6 +88,7 @@ export default async function search(corpus_dir, searchWords, subCorp_name, winn
         let resultsFolder = await historyFolder.getDirectoryHandle(subCorp_name, { create: true });
 
         data["Searched Words"] = searchWords
+        data["date"] = date;
         // write about file
         const aboutHandle = await resultsFolder.getFileHandle("about.txt", { create: true });
         const aboutWriter = await aboutHandle.createWritable();

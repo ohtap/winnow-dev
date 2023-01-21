@@ -41,6 +41,7 @@ export default function SearchEntry(props) {
     aboutFile = await aboutFile.text();
 
     const aboutData = JSON.parse(aboutFile);
+    
 
     return aboutData
   }
@@ -51,7 +52,8 @@ export default function SearchEntry(props) {
     var text = "";
 
     for (var key of Object.keys(aboutData)) {
-      if (key === "wordCounts" || key === "Searched Words") {
+      // ignoring these as they crowd display
+      if (key === "wordCounts" || key === "Searched Words" || key === "date") {
         //do nothing 
       } else {
         text += `${key}: ${aboutData[key]}    `;
@@ -60,8 +62,6 @@ export default function SearchEntry(props) {
     }
 
     setAbout(text);
-    /*var element = document.getElementById("about");
-    element.appendChild(tag);*/
   }
 
   // creates and displays a table of all keyword counts
