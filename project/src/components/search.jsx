@@ -186,17 +186,14 @@ export default async function search(corpus_dir, searchWords, subCorp_name, winn
         let fileRef = {}
         try {
             let index = await saveDestHandle.getFileHandle("asearchIndx.json", { create: false });
-            console.log("made it into actual search")
             index = await index.getFile();
             index = await index.text();
-            console.log("made it 2nd")
             srchIndx = new Index();
             srchIndx.load(index);
             let fileRef1 = await saveDestHandle.getFileHandle("fileRef.txt")
             let fileRef2 = await fileRef1.getFile()
             let fileRef3 = await fileRef2.text()
             fileRef = JSON.parse(fileRef3)
-            console.log("finished !! ")
         } catch (err) {
             console.log(err)
             console.log("couldn't find index, proceeding to build one")
@@ -215,7 +212,7 @@ export default async function search(corpus_dir, searchWords, subCorp_name, winn
 
         aboutSearch["Name"] = subCorp_name;
         aboutSearch["Source Corpus Name"] = corpus_dir.name;
-        aboutSearch["Files in Corpus"] = resultsFull.length;
+        aboutSearch["Files with Search Term"] = resultsFull.length;
 
         let hLIndx = {}
         let resultsFolder = await aboutWriter(aboutSearch, resultsFull);

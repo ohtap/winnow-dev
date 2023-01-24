@@ -332,11 +332,11 @@ export default function DisplayResult(props) {
         </div>
         <div>
           <div id="scrollMarks">
-            <button className="scrollBtn" onClick={scrollHighlights}> {curMark + 1}/{marks.length} Next Match</button>
+            <button className="scrollBtn" onClick={scrollHighlights}> {curMark + 1}/{marks.length} Select Next Match</button>
+            <p className = "selectedFile">Selected File:  {fileViewed}</p>
           </div>
           <div className="fileReader">
 
-            <p>{fileViewed}</p>
             {/*  <Highlighter id ="test" searchWords = {keyWords} textToHighlight={viewerContent}>
     </Highlighter>*/}
             <p className="textCont" id="textCont">{viewerContent}</p>
@@ -346,7 +346,7 @@ export default function DisplayResult(props) {
 
       <div>
         <button className = "downloadButton" onClick={saveResults}> Download Results</button>
-        <button className = "deleteButton" onClick={deleteResults}>Delete Results</button>
+        <button className = "deleteButton" onClick={deleteResults}>Delete Results of This Search</button>
       </div>
     </div>
 

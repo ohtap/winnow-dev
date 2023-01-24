@@ -204,7 +204,7 @@ export default function SearchForm(props) {
                                 placeholder="Results Name">
 
                             </input>
-                            <p> Enter search terms seperated by a comma. Single terms only, no phrases </p>
+                            {fromLanding ? <p>Enter search terms seperated by a comma. Single terms only, no phrases</p> : <></>}
                             <input
                                 className={`form-input${fromLanding}`}
                                 ref={raw_include}
