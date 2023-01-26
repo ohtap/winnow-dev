@@ -4,7 +4,7 @@ export default function Info (props){
 
     return(
             <div className = "parent">
-           <iframe className = "InfoFrame" src="https://docs.google.com/document/d/e/2PACX-1vR-QgKeImuzeK716AInOCFkdqLb9uJvnt0oNcrMApPca2c3uqygMNR6eBMVQPba_qeGtKQlnWZRV9M2/pub?embedded=true"></iframe>
+            <iframe src="https://docs.google.com/document/d/e/2PACX-1vRFAnCWAZLQz9mK-df-OEpnofUXc1ttDXFYOJP5GE-_8cRkVag0pN3vMvMi7U_Wg-V7x56dwEKJU5Kf/pub?embedded=true"></iframe>
            </div>
     )
 
