@@ -91,17 +91,20 @@ export default function Landing(props) {
         <div className="w-100 vh-100 align-items-center source-sans border main" >
             {/* text div, stores "Sign in" etc text from top of the page */}
             <div className="w-auto">
-                <h1 className="text-center">Winnow</h1>
-                <p className="text-center login-text fs-5">Please select the working directory for Winnow and allow read/write permissions</p>
-                <p className="text-center login-text fs-5"> If you do not have a Winnow directoy, go ahead and make a new folder. Preferably someplace easy to locate such as your desktop or documents. </p>
+                <h1 className="text-center"> Welcome to Winnow</h1>
+                <p className="text-center login-text fs-5">Winnow provides a search tool for large text databases, such as collections of oral history interview transcripts.<br></br>
+                     For instructions on how to use Winnow, see the About tab. Winnow runs on Chrome and Chromium browsers only.</p>
+                <p className="text-center login-text fs-5">Please select a working directory for Winnow on your computer, then allow read/write permissions.</p>
+                <p className="text-center login-text fs-5">Create your Winnow folder where it is easy to locate on your desktop or in your documents.</p>
+
             </div>
             {/* create form */}
             <div className="formContainer1 h-50">
                 <form className="form-div1 mx-auto" onSubmit={handleSubmit}>
-                    <button id="workingDirectory" className="form-input1" onClick={filePicker}> Pick Winnow Directory</button>
+                    <button id="workingDirectory" className="form-input2" onClick={filePicker}> PICK WINNOW DIRECTORY</button>
                     {/* submission button,*/}
                     <button type="submit" id="submit-btn" className="submitButton1">
-                        submit
+                        SUBMIT
                     </button>
                 </form>
                 <br></br>

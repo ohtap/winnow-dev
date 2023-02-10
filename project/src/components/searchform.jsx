@@ -204,7 +204,7 @@ export default function SearchForm(props) {
                                 placeholder="Results Name">
 
                             </input>
-                            {fromLanding ? <p>Enter search terms seperated by a comma. Single terms only, no phrases</p> : <></>}
+                            {fromLanding ? <p>Enter search terms seperated by a comma. Single terms only, no phrases.</p> : <></>}
                             <input
                                 className={`form-input${fromLanding}`}
                                 ref={raw_include}
@@ -224,7 +224,7 @@ export default function SearchForm(props) {
 
                             {/* submission button, uses onClick event to upload to server */}
                             <button type="submit" id="submit-btn" className={`submitButton${fromLanding}`}>
-                                submit
+                                SUBMIT
                             </button>
                         </form>
                     </div>

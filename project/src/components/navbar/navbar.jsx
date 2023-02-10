@@ -34,29 +34,30 @@ function NavBar(props) {
             Change Directory
             */}
             {winnowDir ? <div className="d-flex w-50 fs-3 pb-2 justify-content-center">
-            
-                <button className="navlink" onClick={(event) => {
+
+            <button className="navlink" onClick={(event) => {
+                    event.preventDefault;
+                    pageSet(Pages.Landing)
+                }}>Home</button> 
+
+            <button className="navlink" onClick={(event) => {
+                    event.preventDefault;
+                    pageSet(Pages.Info)
+                }}>About</button>
+             <button className="navlink" onClick={(event) => {
                     event.preventDefault;
                     pageSet(Pages.Search)
                 }}>Search</button>
-                <button className="navlink" onClick={(event) => {
+            <button className="navlink" onClick={(event) => {
                     event.preventDefault;
                     pageSet(Pages.SearchTerms)
-                }}>Term-Library</button>
-                <button className="navlink" onClick={(event) => {
+                }}>Term Library</button>
+            <button className="navlink" onClick={(event) => {
                     event.preventDefault;
                     pageSet(Pages.History)
-                }}>History</button>
-                    <button className="navlink" onClick={(event) => {
-                    event.preventDefault;
-                    pageSet(Pages.Landing)
-                }}
-                >Directory</button> 
-                  <button className="navlink" onClick={(event) => {
-                    event.preventDefault;
-                    pageSet(Pages.Info)
-                }}
-                >About</button>
+                }}>Search History</button>
+                  
+                
 
 
             </div > :
@@ -64,13 +65,14 @@ function NavBar(props) {
                     <button className="navlink" onClick={(event) => {
                         event.preventDefault;
                         pageSet(Pages.Landing)
-                    }}
-                    >Directory</button>
+                    }}>Home</button>
+                    
                     <button className="navlink" onClick={(event) => {
-                    event.preventDefault;
-                    pageSet(Pages.Info)
-                }}
-                >About</button>
+                        event.preventDefault;
+                        pageSet(Pages.Info)
+                    }}>About</button>
+
+                    
                 </div>}
         </div>
     );

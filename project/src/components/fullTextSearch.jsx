@@ -7,6 +7,22 @@ import { stemmer } from 'stemmer'
 let defaultStopWords = ["to", "you", "of", "them", "that", "this", "all"]
 let defaultStemmer = stemmer;
 
+
+
+
+
+// NEW TODO : 
+// Add non-stemmed words into building the index - check to make sure this doesnt kill it
+// Create a token type and a parser; Parser will set flags as to what the token is, and fill in fields. 
+// Functionality:  If a single word is in "quotes" we strip the quotes and search for the word ecactly as is, no stemmer. (can signify this via flags)
+// If a phrase is entered. Breaks up phrase, filters out stop words, strips quotes and punctuation. Then stores indv tokens in an array, flags it as a phrase
+
+// handling these :  the "quotes" word literal is easy, just dont pass the token thru the stemmer. 
+// the phrase should be handled in its own function: 
+//      We run our normal search on each token, compare the results, (Union them). 
+//      If there is anything left then we must run some sort of simple token search on these remainders! 
+//      perhaps make this last part its own function, nice to use in the highlighting functin as well. 
+//      can take an optional location flag to return location and length etc. 
 export default class Index {
     constructor(wordIndex, stopWords, stemmer) {
         // sets the flag on storing word match indexes, (we will accept null here as well)
@@ -78,15 +94,15 @@ export default class Index {
         let words = []
         // I believe this is slower then the regex split - I imagine we have some better ways of getting indexes with regex
         for (let i = 0; i < document.length; i++) {
-            if (document[i].match(/[\n\s]+/) || i == 0) {
-                let j = i + 1
-                while (j < document.length && !(document[j].match(/[\n\s]+/))) {
-                    j++
-                }
+                if (!document[i].match(/^\p{L}+$/u) || i == 0){
+                    let j = i + 1
+                    while( j < document.length && (document[j].match(/^\p{L}+$/u))){
+                        j++
+                    }
                 // just a test but now need to add these in. 
                 let wordIndx = { "word": document.substring(i + 1, j).toLowerCase(), "start": i + 1, "len": j - (i + 1) }
                 let word = document.substring(i + 1, j).toLowerCase()
-                word = word.replace(/[,."!?@#$%&]+/g, "").trim();
+                word = word.replace(/[,."!?@#$%&:]+/g, "").trim();
                 word = this.stemmer(word)
 
                 if (this._index[word] != -1) {

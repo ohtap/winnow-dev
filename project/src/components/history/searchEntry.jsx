@@ -65,9 +65,9 @@ export default function SearchEntry(props) {
   }
 
   // creates and displays a table of all keyword counts
-  const createKeyWordTable = (keyWordCounts) => {
-
-    const keyWords = Object.keys(keyWordCounts);
+  const createKeyWordTable = (keyWords) => {
+    console.log(keyWords);
+    //const keyWords = Object.keys(keyWordCounts);
 
     // getting the div in which to place the element and creating the table element
     const div = document.getElementById(keyWordContent);
@@ -87,7 +87,7 @@ export default function SearchEntry(props) {
       const tr = tbl.insertRow();
       for (let j = 0; j < 3; j++) {
         const td = tr.insertCell();
-        td.appendChild(document.createTextNode(`${keyWords[i]} : ${keyWordCounts[keyWords[i]]}`));
+        td.appendChild(document.createTextNode(`${keyWords[i]}`));
         i++;
 
         if (i >= keyWords.length) {
@@ -132,7 +132,7 @@ export default function SearchEntry(props) {
   const main = async () => {
     const about_data = await getAboutData();
     displayAbout(about_data);
-    createKeyWordTable(about_data["wordCounts"]);
+    createKeyWordTable(about_data["Searched Words"]);
   }
 
   // <div> <pre className = "aboutTxt">{about} </pre></div>
@@ -140,9 +140,9 @@ export default function SearchEntry(props) {
 
   return (
     <div>
-      <div className="keyWordsContainer" id={keyWordsContainer} onClick={goTo} >
+      <div className="keyWordsContainer1" id={keyWordsContainer} onClick={goTo} >
 
-        <div> <p className="aboutTxt">{about} </p></div>
+        <p className="aboutTxt">{about} </p>
         <div className="expandButton" onClick={(e) => { collapse(e); }}>
           <p className="expandLabel">KeyWords</p> </div>
       </div>

@@ -112,12 +112,18 @@ export default function DisplayResult(props) {
     const aboutData = JSON.parse(aboutFile);
     let searchWords = (aboutData["Searched Words"])
     console.log(searchWords)
+
+    // scrubbing text for html characters that will cause issues
+    fileText = fileText.replaceAll(/</g,'')
+    fileText = fileText.replaceAll(/>/g,'')
+
     let srch = new Index(true);
     srch.add(fileName, fileText);
 
     let result = srch.searchTxtIndex(searchWords)
 
     let newFileText = fileText
+
     let entries = {};
     console.log(result[fileName])
     try {
@@ -141,11 +147,12 @@ export default function DisplayResult(props) {
     let x = 0;
     let newMarks = []
     for (let entry of entries) {
-      newFileText = newFileText.substring(0, entry["start"]) + "<mark id='" + x + "'>" + newFileText.substring(entry["start"], entry["start"] + entry["len"]) + "</mark>" + newFileText.substring(entry["start"] + entry["len"]);
+      console.log(newFileText.substring(entry["start"], entry["start"] + entry["len"]));
+     newFileText = newFileText.substring(0, entry["start"]) + "<mark id='" + x + "'>" + (newFileText.substring(entry["start"], entry["start"] + entry["len"]) + "</mark>" + newFileText.substring(entry["start"] + entry["len"]));
       x++;
       newMarks.push(JSON.stringify(x));
       for (let en of entries) {
-        en["start"] += 19 + JSON.stringify(x).length;
+        en["start"] += 19 +(x > 9) + JSON.stringify(x).length;
       }
     }
     setMarks(newMarks);
@@ -160,6 +167,9 @@ export default function DisplayResult(props) {
   }
 
   const scrollHighlights = () => {
+
+    if (fileViewed){
+    
     let nextMark = curMark + 1;
     if (curMark === (marks.length - 1)) {
       nextMark = 0;
@@ -167,8 +177,18 @@ export default function DisplayResult(props) {
     setCurMark(nextMark)
     let tag = document.getElementById(JSON.stringify(nextMark));
     tag.scrollIntoView();
+  }
 
   }
+
+  // currently maps the "n" key to incrementing the highlighted keyword if 
+  // there is a file on display. 
+  const keyPressScroll = (event) =>{
+    if(event.key === 'n' && fileViewed){
+      scrollHighlights();
+    }
+  }
+
 
   const fileToReader = async (result) => {
    // event.preventDefault();
@@ -302,7 +322,7 @@ export default function DisplayResult(props) {
   }
 
   return (
-    <div>
+    <div onKeyDown = {keyPressScroll} tabIndex = "0">
       <SearchForm fromLanding={0} pageSet={pageSet} />
       <div className="aboutSearch" id="about">
         <p className="aboutTxt">{about} </p>
