@@ -149,7 +149,7 @@ export default function SearchForm(props) {
         for (var token of tokens) {
             // cleaning tokens 
             token = token.toLowerCase();
-            token = token.replace(/[,."!?@#$%&]+/g, " ").trim();
+            token = token.replace(/[,.!?@#$%&]+/g, " ").trim();
 
             cleantokens.push(token.trim());
         }

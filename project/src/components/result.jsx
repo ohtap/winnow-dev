@@ -27,6 +27,9 @@ export default function DisplayResult(props) {
 
   //runs the main function, prevents multiple reruns of main
   useEffect(() => {
+    setFileViewed();
+    let ourText = document.getElementById("textCont")
+    ourText.innerHTML = "";
     main();
   }, [recentRunDir])
 
@@ -345,8 +348,6 @@ export default function DisplayResult(props) {
       <div className="files">
         <div id="fileList" className="fileList">
           { resultsRaw.map(result => (
-          // TODO - restructure how we deal with results so we don't need to dont need fileList at all.       
-          //           
             <div key = {result.fileName}><button className = "fileButton" onClick = {() => fileToReader(result)}>{result.fileName}</button></div>
             ))}
         </div>

@@ -86,6 +86,7 @@
 
 .fileButton {
   background-color: white;
+  white-space:nowrap;
   border: none;
 }
 

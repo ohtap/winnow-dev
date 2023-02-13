@@ -71,14 +71,18 @@ export default class Index {
 
         // tokenizing 
         for (let word of words) {
-            word = word.replace(/[,."!?@#$%&]+/g, "").trim();
-            word = this.stemmer(word.toLowerCase());
+            word = word.replace(/[,."!?@#$%&]+/g, "").trim().toLowerCase();
+            let wordStem = this.stemmer(word);
 
-            if (this._index[word] != -1) {
+            if (this._index[wordStem] !== -1 && word !== "this") {
                 this._index[word] ||= new Set();
+                this._index[wordStem] ||= new Set();
                 try {
-                    this._index[word].add(id)
+                    this._index[word].add(id);
+                    this._index[wordStem].add(id);
                 } catch (err) {
+                    console.log(word);
+                    console.log(wordStem);
                     console.log(err)
                 }
             }
@@ -94,38 +98,66 @@ export default class Index {
         let words = []
         // I believe this is slower then the regex split - I imagine we have some better ways of getting indexes with regex
         for (let i = 0; i < document.length; i++) {
-                if (!document[i].match(/^\p{L}+$/u) || i == 0){
+                if (document[i].match((/[\n\s]+/)) || i == 0){
                     let j = i + 1
-                    while( j < document.length && (document[j].match(/^\p{L}+$/u))){
+                   // while( j < document.length && (document[j].match(/^\p{L}+$/u))){
+                      while(j < document.length && !(document[j].match(/[\n\s]+/))){
                         j++
                     }
                 // just a test but now need to add these in. 
                 let wordIndx = { "word": document.substring(i + 1, j).toLowerCase(), "start": i + 1, "len": j - (i + 1) }
                 let word = document.substring(i + 1, j).toLowerCase()
                 word = word.replace(/[,."!?@#$%&:]+/g, "").trim();
-                word = this.stemmer(word)
+                let wordStem = this.stemmer(word)
 
-                if (this._index[word] != -1) {
+               /* if (this._index[word] != -1) {
                     this._index[word] ??= {};
                     this._index[word][id] ??= [];
                     this._index[word][id].push(wordIndx);
+                }*/if (this._index[wordStem] != -1) {
+                    this._index[wordStem] ??= {};
+                    this._index[wordStem][id] ||= new Set();
+                    this._index[word] ??= {};
+                    this._index[word][id] ||= new Set();
+                    this._index[wordStem][id].add(wordIndx);
+                    this._index[word][id].add(wordIndx);
                 }
                 i = --j;
             }
 
         }
-        console.log(this._index)
+        //console.log(this._index)
     }
 
     get index() {
         return this._index;
     }
 
+    /*
+        Method to remove a document from an index.
+    */
     remove(id) {
-        // TODO
+        
         return;
     }
 
+    /*
+        A wrapper for unparsed search queries
+    */
+    searchUnparsed(unParsed){
+        return -1;
+    }
+
+    /*
+        Parsing raw search queries into "query" objects
+    */
+   parse(unParsed){
+        return -1;
+   }
+
+    /*
+        Performs a search on an index that does not contain word positions
+    */
     searchTxt(tokens) {
         //TODO - filter is optional - allows the user to write up some custom filters for the search. 
         // TODO - just run through take each token search the index and return the resulting keys (and values) in an array.
@@ -141,8 +173,17 @@ export default class Index {
 
         let cleanedTokens = new Set()
         for (let word of tokens) {
-            word = word.replace(/[,."!?@#$%&]+/g, "").trim();
-            word = this.stemmer(word.toLowerCase());
+            console.log(word)
+            word = word.replace(/[,.!?@#$%&]+/g, "").trim();
+            console.log(word)
+            if(word[0] === '"' && word.slice(-1) === '"'){
+                console.log("strict word search");
+                word = word.replace(/["]+/g,"").trim();
+            }else{
+                word = word.replace(/["]+/g,"").trim();
+                word = this.stemmer(word.toLowerCase());
+            }
+           // word = this.stemmer(word.toLowerCase());
             cleanedTokens.add(word)
         }
         tokens = cleanedTokens
@@ -157,23 +198,32 @@ export default class Index {
         return Array.from(results);
     }
 
+    /*
+        Performs a search on an index that has word positions
+    */
     searchTxtIndex(tokens) {
         console.log(tokens)
         console.log(this._index)
         let cleanedTokens = new Set()
         for (let word of tokens) {
-            word = word.replace(/[,."!?@#$%&]+/g, "").trim();
-            word = this.stemmer(word.toLowerCase());
+            word = word.replace(/[,.!?@#$%&]+/g, "").trim();
+           if(word[0] === '"' && word.slice(-1) === '"'){
+                console.log("strict word index srch");
+                word = word.replace(/["]+/g,"").trim();
+            }else{
+                word = this.stemmer(word.toLowerCase());
+            }
+            //word = this.stemmer(word.toLowerCase());*/
+            //word =this.stemmer(word.toLowerCase());
             cleanedTokens.add(word)
         }
 
         let results = {};
         for (let token of cleanedTokens) {
             if (this._index[token] != undefined && this._index[token] != -1) {
-                console.log("used ", token, "and found something at least")
                 console.log(Object.keys(this._index[token]))
                 for (let entry of Object.keys(this._index[token])) {
-                    console.log(entry)
+                   // console.log(entry)
                     results[entry] ??= []
                     for (let word of this._index[token][entry]) {
                         results[entry].push(word);
@@ -217,3 +267,10 @@ export default class Index {
     }
 
 }
+/*
+if(word[0] === '"' && word.slice(-1) === '"'){
+    word = word.replace(/["]+/g,"").trim();
+}else{
+    word = this.stemmer(word.toLowerCase());
+}
+*/
