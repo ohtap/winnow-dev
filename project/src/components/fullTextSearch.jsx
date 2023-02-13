@@ -180,8 +180,8 @@ export default class Index {
                 console.log("strict word search");
                 word = word.replace(/["]+/g,"").trim();
             }else{
-                word = word.replace(/["]+/g,"").trim();
-                word = this.stemmer(word.toLowerCase());
+                word = word.replace(/["]+/g,"").trim().toLowerCase();
+                word = this.stemmer(word);
             }
            // word = this.stemmer(word.toLowerCase());
             cleanedTokens.add(word)
@@ -209,7 +209,7 @@ export default class Index {
             word = word.replace(/[,.!?@#$%&]+/g, "").trim();
            if(word[0] === '"' && word.slice(-1) === '"'){
                 console.log("strict word index srch");
-                word = word.replace(/["]+/g,"").trim();
+                word = word.replace(/["]+/g,"").trim().toLowerCase();
             }else{
                 word = this.stemmer(word.toLowerCase());
             }
